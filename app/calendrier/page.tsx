@@ -62,7 +62,7 @@ export default function CalendrierPage() {
             const response = await fetch(`/api/availability?${params.toString()}`);
             if (response.ok) {
                 const data = await response.json();
-                setAvailability(data.data);
+                setAvailability(data.availability);
             }
         } catch (error) {
             console.error('Fetch availability error:', error);
