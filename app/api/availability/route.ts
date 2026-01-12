@@ -139,18 +139,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Delete existing availability for this user in the same period
-        await db
-            .delete(availability)
-            .where(
-                and(
-                    eq(availability.userId, user.id),
-                    lte(availability.dateDebut, dateFin),
-                    gte(availability.dateFin, dateDebut)
-                )
-            );
-
-        // Create new availability
+        // Create new availability (allow multiple slots per day)
         const [newAvailability] = await db
             .insert(availability)
             .values({
