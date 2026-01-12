@@ -1,6 +1,7 @@
-import { db } from './lib/db/db';
-import { users } from './lib/db/schema';
-import { hashPassword } from './lib/auth';
+import 'dotenv/config';
+import { db } from '../lib/db/db';
+import { users } from '../lib/db/schema';
+import { hashPassword } from '../lib/auth';
 
 const usersToSeed = [
     { nom: 'BA', prenom: 'Adama Guimar', username: 'baadama', password: '4827' },
