@@ -3,18 +3,29 @@
 import { useState, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    User,
+    Lock,
+    ArrowRight,
+    Loader2,
+    AlertCircle,
+    ShieldCheck,
+    Shapes
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
-    const router = useRouter();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        setError('');
         setLoading(true);
+        setError(null);
 
         try {
             const response = await fetch('/api/auth/login', {
@@ -23,116 +34,151 @@ export default function LoginPage() {
                 body: JSON.stringify({ username, password }),
             });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                setError(data.error || 'Erreur de connexion');
-                setLoading(false);
-                return;
+            if (response.ok) {
+                router.push('/calendrier');
+            } else {
+                const data = await response.json();
+                setError(data.error || 'Identifiants incorrects');
             }
-
-            // Redirect to calendar
-            router.push('/calendrier');
-        } catch {
-            setError('Erreur de connexion au serveur');
+        } catch (err) {
+            setError('Une erreur est survenue');
+        } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
-                {/* Logo/Title */}
-                <div className="text-center mb-8 animate-fade-in flex flex-col items-center">
-                    <div className="relative w-48 h-48 mb-4">
-                        <Image
-                            src="/logo.png"
-                            alt="Art'Beau Logo"
-                            fill
-                            className="object-contain drop-shadow-2xl"
-                            priority
-                        />
-                    </div>
-                    <h1 className="text-3xl font-bold text-slate-800 tracking-tight mt-4">
-                        Art&apos;Beau Calendar
-                    </h1>
-                    <p className="text-slate-500 mt-2">Connectez-vous pour gérer vos disponibilités</p>
-                </div>
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50">
 
-                {/* Login Form */}
-                <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-float p-8 sm:p-10 border border-white/50 relative overflow-hidden">
-                    {/* Top Accent */}
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary to-secondary"></div>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Username Field */}
-                        <div className="space-y-2">
-                            <label htmlFor="username" className="block text-sm font-semibold text-slate-700 ml-1">
-                                Nom d&apos;utilisateur
-                            </label>
-                            <input
-                                id="username"
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                className="w-full px-5 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                                placeholder="ex: niasseabdoulaye"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {/* Password Field */}
-                        <div className="space-y-2">
-                            <label htmlFor="password" className="block text-sm font-semibold text-slate-700 ml-1">
-                                Mot de passe
-                            </label>
-                            <input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-5 py-3.5 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                                placeholder="••••••••"
-                                required
-                                disabled={loading}
-                            />
-                        </div>
-
-                        {/* Error Message */}
-                        {error && (
-                            <div className="bg-red-50/80 border border-red-100 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                                </svg>
-                                {error}
-                            </div>
-                        )}
-
-                        {/* Submit Button */}
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-4"
-                        >
-                            {loading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    Connexion en cours...
-                                </span>
-                            ) : 'Se connecter'}
-                        </button>
-                    </form>
-                </div>
-
-                {/* Footer */}
-                <p className="text-center text-xs text-slate-400 mt-8 font-medium">
-                    Art&apos;Beau-Rescence © 2026 - Tous droits réservés
-                </p>
+            {/* Background Decorative Elements */}
+            <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+                    className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[120px]"
+                />
+                <motion.div
+                    animate={{ rotate: -360 }}
+                    transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
+                    className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-[100px]"
+                />
             </div>
+
+            <main className="w-full max-w-md px-6 relative z-10">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                >
+                    {/* Header Logo Section */}
+                    <div className="flex flex-col items-center mb-10">
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                            className="relative w-24 h-24 mb-6"
+                        >
+                            <div className="absolute inset-0 bg-primary/20 rounded-[2rem] blur-2xl animate-pulse" />
+                            <div className="relative glass rounded-[2rem] p-4 flex items-center justify-center shadow-2xl border-white ring-8 ring-white/50">
+                                <Image
+                                    src="/iconlogo.png"
+                                    alt="Art'Beau"
+                                    width={80}
+                                    height={80}
+                                    className="object-contain"
+                                    priority
+                                />
+                            </div>
+                        </motion.div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tighter text-center">
+                            Pro-<span className="text-primary italic">Calendar</span>
+                        </h1>
+                        <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-2">Art&apos;Beau Rescence</p>
+                    </div>
+
+                    {/* Main Form Card */}
+                    <div className="glass-dark border-white/10 p-1 bg-slate-900/95 rounded-[2.5rem] shadow-2xl overflow-hidden shadow-slate-900/40">
+                        <div className="bg-white rounded-[2.2rem] p-8 sm:p-10 space-y-8">
+                            <div className="space-y-2">
+                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Espace Collaborateur</h2>
+                                <p className="text-sm text-slate-400 font-medium">Connectez-vous pour voir le planning équipe.</p>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-6">
+                                <AnimatePresence mode='wait'>
+                                    {error && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="bg-red-50 text-red-600 p-4 rounded-2xl flex items-start gap-3 border border-red-100"
+                                        >
+                                            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                                            <p className="text-sm font-bold leading-tight">{error}</p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <div className="space-y-5">
+                                    <div className="relative group">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                                            <User className="w-5 h-5" />
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
+                                            placeholder="Nom d'utilisateur"
+                                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-50 rounded-2xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="relative group">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors">
+                                            <Lock className="w-5 h-5" />
+                                        </div>
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Mot de passe"
+                                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-50 rounded-2xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full bg-slate-900 hover:bg-black text-white py-5 rounded-2xl font-black text-lg transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed group"
+                                >
+                                    {loading ? (
+                                        <Loader2 className="w-6 h-6 animate-spin" />
+                                    ) : (
+                                        <>
+                                            Continuer
+                                            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {/* Footer Badges */}
+                    <div className="mt-12 flex items-center justify-center gap-8 opacity-40">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">Sécurisé</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Shapes className="w-4 h-4" />
+                            <span className="text-[10px] font-black uppercase tracking-widest">v3.0 Grid</span>
+                        </div>
+                    </div>
+                </motion.div>
+            </main>
         </div>
     );
 }

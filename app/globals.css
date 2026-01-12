@@ -7,9 +7,11 @@
     @apply bg-slate-50 text-slate-900;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-image: url('/logopattern.png');
-    background-size: 400px;
-    background-blend-mode: overlay;
+    background-size: 600px;
+    background-blend-mode: soft-light;
     background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
@@ -18,7 +20,25 @@
     @apply bg-white/80 backdrop-blur-lg border border-white/20 shadow-xl;
   }
 
-  .glass-dark {
-    @apply bg-slate-900/80 backdrop-blur-lg border border-white/10 shadow-xl;
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
   }
 }

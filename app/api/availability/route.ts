@@ -172,3 +172,55 @@ export async function POST(request: NextRequest) {
         );
     }
 }
+
+// DELETE: Supprimer une disponibilité
+export async function DELETE(request: NextRequest) {
+    try {
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json(
+                { error: 'Non authentifié' },
+                { status: 401 }
+            );
+        }
+
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json(
+                { error: 'ID manquant' },
+                { status: 400 }
+            );
+        }
+
+        // Verify ownership and delete
+        const result = await db
+            .delete(availability)
+            .where(
+                and(
+                    eq(availability.id, parseInt(id)),
+                    eq(availability.userId, user.id)
+                )
+            )
+            .returning();
+
+        if (result.length === 0) {
+            return NextResponse.json(
+                { error: 'Disponibilité non trouvée ou non autorisée' },
+                { status: 404 }
+            );
+        }
+
+        return NextResponse.json({
+            success: true,
+            message: 'Disponibilité supprimée avec succès'
+        });
+    } catch (error) {
+        console.error('Delete availability error:', error);
+        return NextResponse.json(
+            { error: 'Erreur lors de la suppression' },
+            { status: 500 }
+        );
+    }
+}
