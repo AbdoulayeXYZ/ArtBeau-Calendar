@@ -201,8 +201,8 @@ export default function CalendrierPage() {
                                 </div>
                             )}
                         </div>
-                        <h3 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
-                            Art&apos;Beau <span className="text-secondary">Calendar</span>
+                        <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
+                            Art&apos;Beau <span className="text-primary">Calendar</span>
                         </h3>
                         <div className="flex items-center gap-4 bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-fit">
                             <button onClick={prev} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
