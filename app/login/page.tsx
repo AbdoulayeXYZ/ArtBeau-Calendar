@@ -90,7 +90,7 @@ export default function LoginPage() {
                             </div>
                         </motion.div>
                         <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter text-center">
-                            Pro-<span className="text-primary italic">Calendar</span>
+                            Art&apos;Beau <span className="text-primary italic">Calendar</span>
                         </h1>
                         <p className="text-slate-500 dark:text-slate-400 font-bold text-sm uppercase tracking-widest mt-2">Art&apos;Beau Rescence</p>
                     </div>
@@ -163,18 +163,6 @@ export default function LoginPage() {
                                     )}
                                 </button>
                             </form>
-                        </div>
-                    </div>
-
-                    {/* Footer Badges */}
-                    <div className="mt-12 flex items-center justify-center gap-8 opacity-40">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">Sécurisé</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Shapes className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">v5.6 Dark</span>
                         </div>
                     </div>
                 </motion.div>
