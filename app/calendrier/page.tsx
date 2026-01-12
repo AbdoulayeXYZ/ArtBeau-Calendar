@@ -27,6 +27,7 @@ import {
     isSameDay
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useEventNotifications } from '@/hooks/useEventNotifications';
 
 interface AvailabilityData {
     id: number;
@@ -155,6 +156,14 @@ export default function CalendrierPage() {
         });
         return Array.from(membersMap.values());
     }, [availability]);
+
+    // Get current user's availability for notifications
+    const myAvailability = useMemo(() => {
+        return availability.filter(a => a.user.username === user?.username);
+    }, [availability, user]);
+
+    // Enable event notifications
+    useEventNotifications(myAvailability);
 
     // View Navigation Helpers
     const next = () => {
