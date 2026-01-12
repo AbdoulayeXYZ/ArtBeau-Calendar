@@ -10,35 +10,31 @@ export default {
         extend: {
             colors: {
                 primary: {
-                    DEFAULT: '#008080',
+                    DEFAULT: '#008080', // Teal brand color
                     light: '#00a0a0',
                     dark: '#006060',
+                    50: '#f0fdfd',
+                    100: '#ccfbfb',
+                    900: '#134e4a',
                 },
                 secondary: {
-                    DEFAULT: '#003366',
+                    DEFAULT: '#003366', // Navy brand color
                     light: '#004488',
                     dark: '#002244',
+                    50: '#f0f4f8',
+                    900: '#0f172a',
                 },
-                disponible: '#10b981',
+                disponible: '#008080', // Using brand teal for available
                 moyennement: '#f59e0b',
                 indisponible: '#ef4444',
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', 'sans-serif'],
             },
-            animation: {
-                'fade-in': 'fadeIn 0.3s ease-in-out',
-                'slide-up': 'slideUp 0.4s ease-out',
-            },
-            keyframes: {
-                fadeIn: {
-                    '0%': { opacity: '0' },
-                    '100%': { opacity: '1' },
-                },
-                slideUp: {
-                    '0%': { transform: 'translateY(10px)', opacity: '0' },
-                    '100%': { transform: 'translateY(0)', opacity: '1' },
-                },
+            boxShadow: {
+                'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+                'card': '0 0 0 1px rgba(0, 0, 0, 0.05), 0 2px 8px rgba(0, 0, 0, 0.05)',
+                'float': '0 10px 30px -10px rgba(0, 51, 102, 0.15)',
             },
         },
     },

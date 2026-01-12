@@ -1,27 +1,25 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 
-const inter = Inter({
-    subsets: ["latin"],
-    display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: "Art'Beau-Calendar - Gestion des Disponibilités",
-    description: "Plateforme de gestion des disponibilités d'équipe",
+    title: "Art'Beau Calendar",
+    description: "Gestion des disponibilités d'équipe",
+    icons: {
+        icon: '/favicon.png',
+    },
 };
 
 export default function RootLayout({
     children,
-}: Readonly<{
+}: {
     children: React.ReactNode;
-}>) {
+}) {
     return (
         <html lang="fr">
-            <body className={inter.className}>
-                {children}
-            </body>
+            <body className={inter.className}>{children}</body>
         </html>
     );
 }
