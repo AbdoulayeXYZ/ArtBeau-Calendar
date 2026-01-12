@@ -24,7 +24,9 @@ import {
     subWeeks,
     isToday,
     addMonths,
-    subMonths
+    subMonths,
+    eachDayOfInterval,
+    isSameDay
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -176,7 +178,7 @@ export default function CalendrierPage() {
                             )}
                         </div>
                         <h1 className="text-5xl font-black text-slate-900 tracking-tighter">
-                            Art&apos;Beau <span className="text-primary italic">Live</span>
+                            Art&apos;Beau <span className="text-primary italic">Calendar</span>
                         </h1>
                         <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 w-fit">
                             <button onClick={prev} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
@@ -313,48 +315,84 @@ export default function CalendrierPage() {
                             </div>
                         </motion.div>
                     ) : period === 'week' ? (
-                        /* WEEK: Summary Matrix View */
+                        /* WEEK: Collaborative Matrix View */
                         <motion.div
                             key="view-week"
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.98 }}
-                            className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8"
+                            className="bg-white rounded-[2rem] lg:rounded-[4rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
                         >
-                            {/* Weekly Presence Summary per Member */}
-                            {teamMembers.map((member) => (
-                                <div key={member.username} className="bg-white rounded-[3rem] p-8 border border-slate-100 shadow-xl shadow-slate-200/50 space-y-6">
-                                    <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-[2rem]">
-                                        <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center font-black text-slate-700 shadow-sm uppercase">
-                                            {member.prenom[0]}{member.nom[0]}
-                                        </div>
-                                        <div>
-                                            <h4 className="font-black text-slate-900">{member.prenom} {member.nom}</h4>
-                                            <p className="text-[10px] font-black text-primary uppercase tracking-widest">Planning Hebdomadaire</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        {availability.filter(a => a.user.username === member.username).map(a => (
-                                            <div key={a.id} className="flex items-center justify-between p-4 bg-white border border-slate-50 rounded-2xl group hover:border-slate-200 transition-all">
-                                                <div className="flex items-center gap-4">
-                                                    <div className={cn("w-2 h-2 rounded-full", a.statut === 'disponible' ? "bg-emerald-500" : a.statut === 'moyennement' ? "bg-amber-500" : "bg-rose-500")} />
-                                                    <div>
-                                                        <p className="text-xs font-black text-slate-800">
-                                                            {format(new Date(a.dateDebut), 'EEEE dd MMM', { locale: fr })}
-                                                        </p>
-                                                        <p className="text-[10px] font-bold text-slate-400 capitalize">{a.horaireText} • {a.statut}</p>
-                                                    </div>
-                                                </div>
-                                                {a.logeBg && <BedDouble className="w-4 h-4 text-primary" />}
-                                            </div>
-                                        ))}
-                                        {availability.filter(a => a.user.username === member.username).length === 0 && (
-                                            <p className="text-center text-xs text-slate-300 italic py-6">Aucune disponibilité cette semaine</p>
-                                        )}
-                                    </div>
+                            <div className="flex border-b border-slate-100 bg-slate-50/50 sticky top-0 z-30 backdrop-blur-md">
+                                <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50 font-black text-[10px] text-slate-300 uppercase tracking-widest">
+                                    Collaborateur
                                 </div>
-                            ))}
+                                <div className="flex flex-1">
+                                    {eachDayOfInterval({
+                                        start: startOfWeek(currentDate, { weekStartsOn: 1 }),
+                                        end: endOfWeek(currentDate, { weekStartsOn: 1 })
+                                    }).map((day: Date, i: number) => (
+                                        <div key={i} className={cn(
+                                            "flex-1 border-r border-slate-100/50 p-4 lg:p-6 flex flex-col items-center gap-1 min-w-[100px]",
+                                            isToday(day) ? "bg-primary/5" : ""
+                                        )}>
+                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{format(day, 'EEE', { locale: fr })}</span>
+                                            <span className={cn("text-lg font-black tracking-tight", isToday(day) ? "text-primary" : "text-slate-900")}>{format(day, 'dd')}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="divide-y divide-slate-100">
+                                {teamMembers.map((member) => (
+                                    <div key={member.username} className="flex min-h-[120px] group hover:bg-slate-50/50 transition-colors">
+                                        <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 p-6 flex flex-col items-center justify-center gap-3">
+                                            <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 flex items-center justify-center text-xs lg:text-sm font-black text-slate-700 shadow-sm border border-slate-200 uppercase">
+                                                {member.prenom[0]}{member.nom[0]}
+                                            </div>
+                                            <div className="text-center">
+                                                <h4 className="font-black text-slate-900 text-[11px] lg:text-sm leading-none">{member.prenom}</h4>
+                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{member.nom}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-1">
+                                            {eachDayOfInterval({
+                                                start: startOfWeek(currentDate, { weekStartsOn: 1 }),
+                                                end: endOfWeek(currentDate, { weekStartsOn: 1 })
+                                            }).map((day: Date, i: number) => {
+                                                const dailyAvail = availability.filter(a =>
+                                                    a.user.username === member.username &&
+                                                    isSameDay(new Date(a.dateDebut), day)
+                                                );
+
+                                                return (
+                                                    <div key={i} className={cn(
+                                                        "flex-1 border-r border-slate-100/30 p-2 lg:p-4 min-w-[100px] relative",
+                                                        isToday(day) ? "bg-primary/5" : ""
+                                                    )}>
+                                                        <div className="space-y-2">
+                                                            {dailyAvail.map(a => (
+                                                                <div key={a.id} className={cn(
+                                                                    "p-2 lg:p-3 rounded-xl lg:rounded-2xl border flex flex-col gap-1 shadow-sm",
+                                                                    a.statut === 'disponible' ? "bg-emerald-50 border-emerald-500/10 text-emerald-900" :
+                                                                        a.statut === 'moyennement' ? "bg-amber-50 border-amber-500/10 text-amber-900" :
+                                                                            "bg-rose-50 border-rose-500/10 text-rose-900"
+                                                                )}>
+                                                                    <div className="flex items-center justify-between">
+                                                                        <span className="text-[8px] font-black uppercase tracking-widest opacity-40">{a.horaireText}</span>
+                                                                        {a.logeBg && <BedDouble className="w-3 h-3 text-primary" />}
+                                                                    </div>
+                                                                    <span className="text-[10px] font-black capitalize">{a.statut}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </motion.div>
                     ) : (
                         /* MONTH: Global Calendar View */

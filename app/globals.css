@@ -6,10 +6,6 @@
     body {
         @apply bg-slate-50 text-slate-900;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background-image: url('/logopattern.png');
-        background-size: 600px;
-        background-blend-mode: soft-light;
-        background-attachment: fixed;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }

@@ -46,8 +46,7 @@ export default function Navbar({ user }: { user: any }) {
                         />
                     </div>
                     <div className="hidden sm:flex flex-col">
-                        <span className="text-xl font-black text-slate-900 tracking-tighter leading-none">Art&apos;Beau</span>
-                        <span className="text-[10px] font-black text-primary uppercase tracking-widest mt-0.5">Live Track</span>
+                        <span className="text-xl font-black text-slate-900 tracking-tighter leading-none">Art&apos;Beau-Calendar</span>
                     </div>
                 </Link>
 

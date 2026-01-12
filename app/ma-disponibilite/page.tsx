@@ -169,7 +169,7 @@ export default function MaDisponibilitePage() {
                                 Retour
                             </button>
                             <h1 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tighter">
-                                Ma <span className="text-primary italic">Présence</span>
+                                Ma <span className="text-primary font-bold">Disponibilité</span>
                             </h1>
                             <p className="text-slate-500 font-medium text-base lg:text-lg">Indiquez vos disponibilités pour que l&apos;équipe puisse s&apos;organiser.</p>
                         </div>
@@ -264,15 +264,15 @@ export default function MaDisponibilitePage() {
                                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Plage horaire</label>
                                     </div>
 
-                                    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white space-y-8 shadow-2xl shadow-slate-900/40 relative overflow-hidden">
+                                    <div className="bg-slate-900 rounded-[2.5rem] p-6 lg:p-8 text-white space-y-6 shadow-2xl shadow-slate-900/40 relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[80px] rounded-full" />
-                                        <div className="relative z-10 flex flex-col gap-6">
+                                        <div className="relative z-10 flex flex-col gap-4 lg:gap-6">
                                             <div className="flex items-center justify-between">
-                                                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-transparent border-none text-3xl font-black text-white focus:ring-0 p-0 w-24" />
-                                                <div className="h-px w-8 bg-white/20" />
-                                                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-none text-3xl font-black text-white focus:ring-0 p-0 w-24 text-right" />
+                                                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-transparent border-none text-xl lg:text-2xl font-black text-white focus:ring-0 p-0 w-20 lg:w-24" />
+                                                <div className="h-px w-6 lg:w-8 bg-white/20" />
+                                                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-none text-xl lg:text-2xl font-black text-white focus:ring-0 p-0 w-20 lg:w-24 text-right" />
                                             </div>
-                                            <div className="flex justify-between text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
+                                            <div className="flex justify-between text-[8px] lg:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
                                                 <span>Arrivée</span>
                                                 <span>Départ</span>
                                             </div>
@@ -330,7 +330,7 @@ export default function MaDisponibilitePage() {
                     >
                         <div className="flex items-center justify-between px-2">
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                                Mes <span className="text-primary italic">Plannings</span>
+                                Mes <span className="text-primary font-bold">Plannings</span>
                             </h3>
                             <div className="bg-slate-100 px-3 py-1 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                 {existingAvailabilities.length} Créneaux
