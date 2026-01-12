@@ -13,12 +13,11 @@ import {
     ChevronLeft,
     Save,
     Loader2,
-    CalendarRange,
-    CalendarDays,
+    BedDouble,
+    LogOut,
+    Calendar as CalendarIcon,
     X,
-    Bed,
-    Moon,
-    ChevronRight
+    Smile
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, addDays, endOfMonth } from 'date-fns';
@@ -62,9 +61,7 @@ export default function MaDisponibilitePage() {
             const response = await fetch('/api/availability');
             if (response.ok) {
                 const data = await response.json();
-                const myData = data.availability.filter((a: any) => a.user.username === user?.username);
-                myData.sort((a: any, b: any) => new Date(b.dateDebut).getTime() - new Date(a.dateDebut).getTime());
-                setExistingAvailabilities(myData);
+                setExistingAvailabilities(data.availability.filter((a: any) => a.user.username === user?.username));
             }
         } catch (error) {
             console.error('Fetch availability error:', error);
@@ -115,7 +112,7 @@ export default function MaDisponibilitePage() {
 
             if (!response.ok) throw new Error('Sauvegarde échouée');
 
-            setSuccess('Disponibilité enregistrée');
+            setSuccess('Disponibilité enregistrée !');
             fetchMyAvailability();
             setTimeout(() => setSuccess(null), 3000);
         } catch (error) {
@@ -127,13 +124,13 @@ export default function MaDisponibilitePage() {
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('Souhaitez-vous supprimer cette déclaration ?')) return;
+        if (!confirm('Voulez-vous supprimer ce créneau ?')) return;
 
         try {
             const response = await fetch(`/api/availability?id=${id}`, { method: 'DELETE' });
             if (!response.ok) throw new Error('Suppression échouée');
 
-            setSuccess('Déclaration supprimée');
+            setSuccess('Créneau supprimé');
             fetchMyAvailability();
             setTimeout(() => setSuccess(null), 3000);
         } catch (error) {
@@ -145,296 +142,313 @@ export default function MaDisponibilitePage() {
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-white">
-                <Loader2 className="w-12 h-12 text-primary animate-spin opacity-20" />
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#FDFDFD]">
+        <div className="min-h-screen bg-slate-50/50">
             <Navbar user={user} />
 
-            <main className="max-w-[1400px] mx-auto px-6 lg:px-12 py-12 lg:py-20">
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-24">
+            <main className="max-w-[1200px] mx-auto px-4 py-6 lg:py-16">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 lg:gap-20">
 
+                    {/* LEFT COLUMN: Clean Form */}
                     <motion.div
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="space-y-16"
+                        className="xl:col-span-7 space-y-8 lg:space-y-10"
                     >
-                        <header className="space-y-6">
+                        <div className="space-y-4">
                             <button
                                 onClick={() => router.back()}
-                                className="flex items-center gap-3 text-slate-400 hover:text-primary transition-all font-bold text-sm group"
+                                className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 font-bold text-xs uppercase tracking-widest"
                             >
-                                <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-                                Retour au tableau
+                                <ChevronLeft className="w-4 h-4" />
+                                Retour
                             </button>
-                            <h1 className="text-6xl font-black text-slate-900 tracking-tight leading-tight">
-                                Ma <span className="text-primary italic">Disponibilité</span>
+                            <h1 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tighter">
+                                Ma <span className="text-primary italic">Présence</span>
                             </h1>
-                            <p className="text-slate-400 font-medium text-lg leading-relaxed max-w-md">
-                                Gérez vos présences et dortoirs avec précision et élégance.
-                            </p>
-                        </header>
+                            <p className="text-slate-500 font-medium text-base lg:text-lg">Indiquez vos disponibilités pour que l&apos;équipe puisse s&apos;organiser.</p>
+                        </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-16">
+                        <form onSubmit={handleSubmit} className="bg-white rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl shadow-slate-200/40 border border-slate-100 p-6 lg:p-12 space-y-8 lg:space-y-12">
 
-                            <div className="space-y-10">
-                                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 flex items-center gap-4">
-                                    <span className="w-8 h-px bg-slate-100"></span>
-                                    01. Type & Statut
-                                </h2>
+                            {/* Statue & Details Header */}
+                            <div className="flex flex-col sm:flex-row items-center gap-6 p-1 bg-slate-50 rounded-[2rem]">
+                                {[
+                                    { id: 'disponible', label: 'Disponible', color: 'emerald', icon: CheckCircle2 },
+                                    { id: 'moyennement', label: 'Partiel', color: 'amber', icon: AlertCircle },
+                                    { id: 'indisponible', label: 'Absent', color: 'rose', icon: X }
+                                ].map((s) => (
+                                    <button
+                                        key={s.id}
+                                        type="button"
+                                        onClick={() => setStatut(s.id as any)}
+                                        className={cn(
+                                            "flex-1 w-full flex items-center justify-center gap-3 py-4 rounded-[1.8rem] text-sm font-black uppercase tracking-widest transition-all",
+                                            statut === s.id
+                                                ? `bg-white text-${s.color}-600 shadow-xl`
+                                                : "text-slate-400 hover:text-slate-600"
+                                        )}
+                                    >
+                                        <s.icon className={cn("w-5 h-5", statut === s.id ? `text-${s.color}-500` : "text-slate-300")} />
+                                        {s.label}
+                                    </button>
+                                ))}
+                            </div>
 
-                                <div className="space-y-8">
-                                    <div className="flex bg-slate-100/50 p-1.5 rounded-2xl w-fit">
-                                        {[
-                                            { id: 'jour', label: 'Quotidien', icon: Calendar },
-                                            { id: 'semaine', label: 'Hebdo', icon: CalendarRange },
-                                            { id: 'mois', label: 'Mensuel', icon: CalendarDays }
-                                        ].map((m) => (
+                            {/* Main Content Sections */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                {/* Période Selection */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+                                            <Calendar className="w-5 h-5 text-primary" />
+                                        </div>
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Période du planning</label>
+                                    </div>
+
+                                    <div className="p-2 bg-slate-50 rounded-3xl flex gap-1 mb-4">
+                                        {['jour', 'semaine', 'mois'].map((m) => (
                                             <button
-                                                key={m.id}
+                                                key={m}
                                                 type="button"
-                                                onClick={() => setSelectionMode(m.id as any)}
+                                                onClick={() => setSelectionMode(m as any)}
                                                 className={cn(
-                                                    "px-8 py-3 rounded-xl text-sm font-black transition-all flex items-center gap-3",
-                                                    selectionMode === m.id ? "bg-white text-primary shadow-xl shadow-black/5" : "text-slate-400 hover:text-slate-600"
+                                                    "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
+                                                    selectionMode === m ? "bg-white text-primary shadow-lg" : "text-slate-400 hover:text-slate-600"
                                                 )}
                                             >
-                                                <m.icon className="w-4 h-4" />
-                                                {m.label}
+                                                {m}
                                             </button>
                                         ))}
                                     </div>
 
-                                    <div className="flex flex-wrap gap-4">
-                                        {[
-                                            { id: 'disponible', label: 'Disponible', color: 'emerald' },
-                                            { id: 'moyennement', label: 'Partiel', color: 'amber' },
-                                            { id: 'indisponible', label: 'Absent', color: 'rose' }
-                                        ].map((s) => (
-                                            <button
-                                                key={s.id}
-                                                type="button"
-                                                onClick={() => setStatut(s.id as any)}
+                                    <div className="space-y-4">
+                                        <div className="group relative">
+                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase">Début</span>
+                                            <input
+                                                type="date"
+                                                value={dateDebut}
+                                                onChange={(e) => setDateDebut(e.target.value)}
+                                                className="w-full pl-20 pr-6 py-5 bg-slate-50 border-2 border-slate-50 rounded-3xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-800"
+                                                required
+                                            />
+                                        </div>
+                                        <div className="group relative">
+                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase">Fin</span>
+                                            <input
+                                                type="date"
+                                                value={dateFin}
+                                                readOnly={selectionMode !== 'jour'}
                                                 className={cn(
-                                                    "flex-1 px-8 py-5 rounded-3xl border-2 font-black text-sm transition-all text-center",
-                                                    statut === s.id
-                                                        ? s.id === 'disponible' ? "bg-emerald-500 border-emerald-500 text-white shadow-2xl shadow-emerald-500/20"
-                                                            : s.id === 'moyennement' ? "bg-amber-500 border-amber-500 text-white shadow-2xl shadow-amber-500/20"
-                                                                : "bg-rose-500 border-rose-500 text-white shadow-2xl shadow-rose-500/20"
-                                                        : "bg-white border-slate-50 text-slate-300 hover:border-slate-200"
+                                                    "w-full pl-20 pr-6 py-5 border-2 rounded-3xl font-bold outline-none transition-all",
+                                                    selectionMode === 'jour'
+                                                        ? "bg-slate-50 border-slate-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 text-slate-800"
+                                                        : "bg-slate-100 border-slate-100 text-slate-300"
                                                 )}
-                                            >
-                                                {s.label}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-10">
-                                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 flex items-center gap-4">
-                                    <span className="w-8 h-px bg-slate-100"></span>
-                                    02. Plage Temporelle
-                                </h2>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div className="space-y-4">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-4">Calendrier</label>
-                                        <div className="flex items-center gap-4 bg-white border border-slate-100 p-4 rounded-3xl shadow-sm">
-                                            <input type="date" value={dateDebut} onChange={(e) => setDateDebut(e.target.value)} className="bg-transparent border-none text-slate-900 font-bold outline-none flex-1 py-2" />
-                                            <ChevronRight className="w-5 h-5 text-slate-200" />
-                                            <input type="date" value={dateFin} readOnly={selectionMode !== 'jour'} className={cn("bg-transparent border-none font-bold outline-none flex-1 py-2", selectionMode === 'jour' ? "text-slate-900" : "text-slate-200")} />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest pl-4">Horaires</label>
-                                        <div className="flex items-center gap-4 bg-slate-900 text-white p-4 rounded-3xl shadow-xl">
-                                            <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-transparent border-none font-black text-xl outline-none flex-1 text-center py-2" />
-                                            <span className="text-white/20 font-light">—</span>
-                                            <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-none font-black text-xl outline-none flex-1 text-center py-2" />
+                                            />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="space-y-10">
-                                <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 flex items-center gap-4">
-                                    <span className="w-8 h-px bg-slate-100"></span>
-                                    03. Nuitée & Dortoirs
-                                </h2>
+                                {/* Hours Selection */}
+                                <div className="space-y-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-2xl bg-secondary/10 flex items-center justify-center">
+                                            <Clock className="w-5 h-5 text-secondary" />
+                                        </div>
+                                        <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Plage horaire</label>
+                                    </div>
 
-                                <button
-                                    type="button"
-                                    onClick={() => setLogeBg(!logeBg)}
-                                    className={cn(
-                                        "w-full p-10 rounded-[3rem] border-4 flex items-center justify-between transition-all group",
-                                        logeBg ? "border-primary bg-primary/5 text-primary shadow-2xl shadow-primary/10" : "border-slate-50 bg-white text-slate-300 hover:border-slate-100 hover:text-slate-500"
-                                    )}
-                                >
-                                    <div className="flex flex-col items-start gap-2">
+                                    <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white space-y-8 shadow-2xl shadow-slate-900/40 relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[80px] rounded-full" />
+                                        <div className="relative z-10 flex flex-col gap-6">
+                                            <div className="flex items-center justify-between">
+                                                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-transparent border-none text-3xl font-black text-white focus:ring-0 p-0 w-24" />
+                                                <div className="h-px w-8 bg-white/20" />
+                                                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-none text-3xl font-black text-white focus:ring-0 p-0 w-24 text-right" />
+                                            </div>
+                                            <div className="flex justify-between text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
+                                                <span>Arrivée</span>
+                                                <span>Départ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Sleeper Option (Clarified!) */}
+                                    <button
+                                        type="button"
+                                        onClick={() => setLogeBg(!logeBg)}
+                                        className={cn(
+                                            "w-full p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all group",
+                                            logeBg ? "border-primary bg-primary/5 text-primary shadow-xl shadow-primary/5" : "border-slate-100 bg-white text-slate-400 hover:border-slate-200"
+                                        )}
+                                    >
                                         <div className="flex items-center gap-4">
-                                            <Bed className={cn("w-8 h-8 transition-transform group-hover:scale-110", logeBg ? "text-primary" : "text-slate-200")} />
-                                            <span className="text-2xl font-black tracking-tight">Dormir sur place aux dortoirs (BG)</span>
+                                            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center transition-colors", logeBg ? "bg-primary text-white" : "bg-slate-50 text-slate-300 group-hover:bg-slate-100")}>
+                                                <BedDouble className="w-6 h-6" />
+                                            </div>
+                                            <div className="text-left">
+                                                <p className="font-black text-sm tracking-tight leading-none mb-1">Dortoir (BG)</p>
+                                                <p className="text-[10px] font-bold uppercase tracking-widest opacity-60">Je loge sur place</p>
+                                            </div>
                                         </div>
-                                        <p className="text-sm font-medium opacity-60 ml-12">Cochez cette case si vous logez dans nos dortoirs internes.</p>
-                                    </div>
-                                    {logeBg && (
-                                        <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
-                                            <Moon className="w-7 h-7 text-white" />
+                                        <div className={cn("w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all", logeBg ? "bg-primary border-primary scale-110" : "border-slate-200")}>
+                                            <AnimatePresence>
+                                                {logeBg && (
+                                                    <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-2 h-2 bg-white rounded-full" />
+                                                )}
+                                            </AnimatePresence>
                                         </div>
-                                    )}
-                                </button>
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="pt-10 flex items-center gap-6">
+                            {/* Submit */}
+                            <div className="pt-6">
                                 <button
                                     type="submit"
                                     disabled={saving}
-                                    className="flex-1 bg-slate-900 hover:bg-black text-white py-8 rounded-[2.5rem] font-black text-xl transition-all shadow-2xl shadow-slate-900/40 hover:-translate-y-2 active:scale-95 flex items-center justify-center gap-4 disabled:opacity-50"
+                                    className="w-full bg-slate-900 hover:bg-black text-white py-6 rounded-3xl font-black text-xl transition-all shadow-2xl hover:shadow-slate-900/40 hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-4 disabled:opacity-50"
                                 >
                                     {saving ? <Loader2 className="w-6 h-6 animate-spin" /> : <Save className="w-6 h-6" />}
-                                    Confirmer la déclaration
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => router.push('/calendrier')}
-                                    className="h-24 w-24 rounded-[2.5rem] border-2 border-slate-100 flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-slate-900 transition-all group"
-                                >
-                                    <X className="w-8 h-8 transition-transform group-hover:rotate-90" />
+                                    Confirmer mon planning
                                 </button>
                             </div>
                         </form>
                     </motion.div>
 
+                    {/* RIGHT COLUMN: Redesigned Plannings Feed */}
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="space-y-12"
+                        className="xl:col-span-5 space-y-8"
                     >
-                        <header className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <h3 className="text-3xl font-black text-slate-900 tracking-tighter">Mes <span className="text-primary italic">Plannings</span></h3>
-                                <div className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">{existingAvailabilities.length} Déclarations actives</p>
-                                </div>
+                        <div className="flex items-center justify-between px-2">
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                                Mes <span className="text-primary italic">Plannings</span>
+                            </h3>
+                            <div className="bg-slate-100 px-3 py-1 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                {existingAvailabilities.length} Créneaux
                             </div>
-                        </header>
+                        </div>
 
-                        <div className="grid grid-cols-1 gap-6 max-h-[900px] overflow-y-auto pr-4 custom-scrollbar">
+                        <div className="space-y-6 max-h-[800px] overflow-y-auto pr-4 custom-scrollbar">
                             <AnimatePresence mode='popLayout'>
                                 {existingAvailabilities.length > 0 ? (
                                     existingAvailabilities.map((item) => (
                                         <motion.div
                                             key={item.id}
                                             layout
-                                            initial={{ opacity: 0, y: 30 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, scale: 0.9 }}
-                                            className="group bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm hover:shadow-2xl hover:border-white transition-all duration-500 relative overflow-hidden"
+                                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.9, x: -20 }}
+                                            className="group relative bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl hover:border-white transition-all duration-300"
                                         >
+                                            {/* Status Badge Side */}
                                             <div className={cn(
-                                                "absolute top-0 left-0 w-2 h-full",
+                                                "absolute top-1/2 -translate-y-1/2 left-0 w-1.5 h-12 rounded-r-full",
                                                 item.statut === 'disponible' ? "bg-emerald-500" :
                                                     item.statut === 'moyennement' ? "bg-amber-500" : "bg-rose-500"
                                             )} />
 
-                                            <div className="flex justify-between items-center relative z-10">
-                                                <div className="space-y-6">
+                                            <div className="flex justify-between items-start pl-4">
+                                                <div className="space-y-4 flex-1">
                                                     <div className="flex items-center gap-3">
                                                         <div className={cn(
-                                                            "px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest",
+                                                            "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest",
                                                             item.statut === 'disponible' ? "bg-emerald-50 text-emerald-600" :
                                                                 item.statut === 'moyennement' ? "bg-amber-50 text-amber-600" : "bg-rose-50 text-rose-600"
                                                         )}>
                                                             {item.statut}
                                                         </div>
                                                         {item.logeBg && (
-                                                            <div className="px-4 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                                                                <Bed className="w-3 h-3" />
-                                                                Dortoir BG
+                                                            <div className="flex items-center gap-1.5 text-secondary font-black text-[9px] uppercase tracking-widest">
+                                                                <BedDouble className="w-3 h-3" />
+                                                                Dortoir
                                                             </div>
                                                         )}
                                                     </div>
 
-                                                    <div className="flex flex-col">
-                                                        <h4 className="text-4xl font-black text-slate-900 tracking-tighter">
-                                                            {format(new Date(item.dateDebut), 'dd', { locale: fr })}
-                                                            <span className="text-slate-300 text-lg mx-2 font-light">
-                                                                {format(new Date(item.dateDebut), 'MMM', { locale: fr })}
-                                                            </span>
-                                                            <span className="mx-4 text-slate-100 font-thin">—</span>
-                                                            {format(new Date(item.dateFin), 'dd', { locale: fr })}
-                                                            <span className="text-slate-300 text-lg mx-2 font-light">
-                                                                {format(new Date(item.dateFin), 'MMM', { locale: fr })}
-                                                            </span>
-                                                        </h4>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-6 text-slate-400">
-                                                        <div className="flex items-center gap-2">
-                                                            <Clock className="w-4 h-4" />
-                                                            <span className="text-sm font-bold uppercase tracking-tight">{item.horaireText}</span>
+                                                    <div className="flex items-center gap-6">
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Du au</span>
+                                                            <p className="font-black text-slate-900 text-lg tracking-tight">
+                                                                {format(new Date(item.dateDebut), 'dd MMM', { locale: fr })}
+                                                                <span className="mx-2 text-slate-200">—</span>
+                                                                {format(new Date(item.dateFin), 'dd MMM', { locale: fr })}
+                                                            </p>
                                                         </div>
-                                                        <div className="h-4 w-px bg-slate-100" />
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center font-bold text-[10px] text-slate-900">
-                                                                {user?.prenom[0]}{user?.nom[0]}
-                                                            </div>
-                                                            <span className="text-xs font-medium italic">Par vous</span>
+                                                        <div className="h-8 w-px bg-slate-100" />
+                                                        <div className="flex flex-col">
+                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Horaire</span>
+                                                            <p className="font-bold text-slate-600">
+                                                                {item.horaireText}
+                                                            </p>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 <button
                                                     onClick={() => handleDelete(item.id)}
-                                                    className="w-16 h-16 rounded-3xl bg-transparent border border-slate-50 text-slate-100 hover:border-rose-100 hover:bg-rose-50 hover:text-rose-500 transition-all flex items-center justify-center group/del"
+                                                    className="p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-2xl transition-all"
                                                 >
-                                                    <Trash2 className="w-6 h-6 transition-transform group-hover/del:scale-110" />
+                                                    <Trash2 className="w-5 h-5" />
                                                 </button>
                                             </div>
-
-                                            <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-primary/2 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
                                         </motion.div>
                                     ))
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-40 text-center gap-6">
-                                        <div className="w-24 h-24 rounded-full bg-slate-50 flex items-center justify-center">
-                                            <Calendar className="w-10 h-10 text-slate-100" />
+                                    <div className="flex flex-col items-center justify-center py-20 gap-6 bg-slate-50/50 rounded-[3rem] border-2 border-dashed border-slate-100">
+                                        <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
+                                            <CalendarIcon className="w-8 h-8 text-slate-200" />
                                         </div>
-                                        <div className="space-y-2">
-                                            <p className="text-lg font-black text-slate-900">Aucun historique</p>
-                                            <p className="text-sm text-slate-400 font-medium">Commencez par déclarer votre première disponibilité.</p>
+                                        <div className="text-center space-y-1">
+                                            <p className="text-slate-400 font-black uppercase text-xs tracking-widest">Aucun planning</p>
+                                            <p className="text-slate-300 text-[10px] font-bold">Vos créneaux apparaîtront ici.</p>
                                         </div>
                                     </div>
                                 )}
                             </AnimatePresence>
                         </div>
-                    </motion.div>
 
+                        {/* Motivational Box */}
+                        <div className="p-8 bg-gradient-to-br from-primary to-teal-400 rounded-[2.5rem] text-white shadow-xl shadow-primary/20 flex items-center gap-6">
+                            <div className="w-14 h-14 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shrink-0">
+                                <Smile className="w-7 h-7" />
+                            </div>
+                            <div className="space-y-1">
+                                <p className="font-black text-lg tracking-tight leading-none">Bon travail {user?.prenom} !</p>
+                                <p className="text-white/70 text-xs font-medium">Votre rigueur aide toute l&apos;équipe.</p>
+                            </div>
+                        </div>
+
+                        <button className="w-full py-4 flex items-center justify-center gap-3 text-slate-400 font-bold hover:text-slate-900 transition-colors group">
+                            Déconnexion sécurisée
+                            <LogOut className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                        </button>
+                    </motion.div>
                 </div>
             </main>
 
+            {/* Success Notification */}
             <AnimatePresence>
                 {success && (
                     <motion.div
                         initial={{ opacity: 0, y: 50 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-12 right-12 z-[100]"
+                        className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[100]"
                     >
-                        <div className="bg-slate-900 text-white px-10 py-6 rounded-[2.5rem] shadow-2xl flex items-center gap-6 border border-white/10">
-                            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-                                <CheckCircle2 className="w-6 h-6 text-white" />
+                        <div className="bg-slate-900 text-white px-10 py-5 rounded-full shadow-2xl flex items-center gap-4 border border-white/10 ring-[10px] ring-black/5">
+                            <div className="w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center">
+                                <CheckCircle2 className="w-5 h-5" />
                             </div>
-                            <div className="flex flex-col">
-                                <p className="text-lg font-black tracking-tight">{success}</p>
-                                <p className="text-[10px] font-black uppercase tracking-widest text-white/40">Mise à jour effectuée</p>
-                            </div>
+                            <span className="font-black text-sm uppercase tracking-widest">{success}</span>
                         </div>
                     </motion.div>
                 )}
