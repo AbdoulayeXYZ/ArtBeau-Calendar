@@ -22,6 +22,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format, addDays, endOfMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useViewport } from '@/hooks/useViewport';
 
 export default function MaDisponibilitePage() {
     const router = useRouter();
@@ -39,6 +40,9 @@ export default function MaDisponibilitePage() {
     const [startTime, setStartTime] = useState('09:00');
     const [endTime, setEndTime] = useState('17:00');
     const [logeBg, setLogeBg] = useState(false);
+
+    // Mobile tab state
+    const [activeTab, setActiveTab] = useState<'form' | 'list'>('form');
 
     const fetchUser = useCallback(async () => {
         try {
@@ -139,6 +143,9 @@ export default function MaDisponibilitePage() {
         }
     };
 
+    // Viewport detection (must be before any conditional returns)
+    const { isMobile } = useViewport();
+
     if (loading) {
         return (
             <div className="h-screen flex items-center justify-center bg-white dark:bg-slate-950">
@@ -152,8 +159,55 @@ export default function MaDisponibilitePage() {
             <Navbar user={user} />
 
             <main className="flex-1 flex flex-col lg:flex-row overflow-hidden w-full max-w-[1700px] mx-auto">
+                {/* MOBILE TABS */}
+                {isMobile && (
+                    <div className="flex-none bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+                        <div className="flex">
+                            <button
+                                onClick={() => setActiveTab('form')}
+                                className={cn(
+                                    "flex-1 py-4 px-6 font-bold text-sm transition-colors relative",
+                                    activeTab === 'form'
+                                        ? "text-primary dark:text-primary"
+                                        : "text-slate-400 dark:text-slate-500"
+                                )}
+                            >
+                                Ajouter
+                                {activeTab === 'form' && (
+                                    <motion.div
+                                        layoutId="activeTab"
+                                        className="absolute bottom-0 left-0 right-0 h-1 bg-primary"
+                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                    />
+                                )}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('list')}
+                                className={cn(
+                                    "flex-1 py-4 px-6 font-bold text-sm transition-colors relative",
+                                    activeTab === 'list'
+                                        ? "text-primary dark:text-primary"
+                                        : "text-slate-400 dark:text-slate-500"
+                                )}
+                            >
+                                Mes Créneaux ({existingAvailabilities.length})
+                                {activeTab === 'list' && (
+                                    <motion.div
+                                        layoutId="activeTab"
+                                        className="absolute bottom-0 left-0 right-0 h-1 bg-primary"
+                                        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                    />
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* LEFT COLUMN: Compact Form (Fixed Width on Desktop) */}
-                <div className="w-full lg:w-[360px] flex-none flex flex-col border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 lg:h-full">
+                <div className={cn(
+                    "w-full lg:w-[360px] flex-none flex flex-col border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 lg:h-full",
+                    isMobile && activeTab === 'list' && "hidden"
+                )}>
                     <div className="p-4 overflow-y-auto custom-scrollbar flex-1">
                         <div className="flex items-center gap-2 mb-4">
                             <button onClick={() => router.back()} className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -311,7 +365,10 @@ export default function MaDisponibilitePage() {
                 </div>
 
                 {/* RIGHT COLUMN: Scrollable List */}
-                <div className="flex-1 bg-slate-50/30 dark:bg-slate-950/50 overflow-y-auto custom-scrollbar p-4 lg:p-6">
+                <div className={cn(
+                    "flex-1 bg-slate-50/30 dark:bg-slate-950/50 overflow-y-auto custom-scrollbar p-4 lg:p-6 pb-20 lg:pb-6",
+                    isMobile && activeTab === 'form' && "hidden"
+                )}>
                     <div className="max-w-4xl mx-auto space-y-4">
                         <div className="flex items-center justify-between mb-2">
                             <h3 className="text-sm font-black text-slate-500 uppercase tracking-widest">Vos Créneaux ({existingAvailabilities.length})</h3>
