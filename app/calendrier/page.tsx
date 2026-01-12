@@ -46,8 +46,10 @@ interface AvailabilityData {
 }
 
 const HOURS = Array.from({ length: 15 }, (_, i) => i + 8); // 08:00 to 22:00
+const PX_PER_HOUR = 50; // Compact height
 
 export default function CalendrierPage() {
+    // ... state ...
     const [user, setUser] = useState<{ nom: string; prenom: string; username: string } | null>(null);
     const [loading, setLoading] = useState(true);
     const [availability, setAvailability] = useState<AvailabilityData[]>([]);
@@ -162,18 +164,18 @@ export default function CalendrierPage() {
         try {
             const [h, m] = timeStr.split(':').map(Number);
             const decimalHour = h + m / 60;
-            return Math.max(0, (decimalHour - 8) * 80);
+            return Math.max(0, (decimalHour - 8) * PX_PER_HOUR);
         } catch { return 0; }
     };
 
     const getTimeHeight = (horaireText: string) => {
-        if (!horaireText || !horaireText.includes('-')) return 80;
+        if (!horaireText || !horaireText.includes('-')) return PX_PER_HOUR;
         try {
             const [start, end] = horaireText.split('-').map(s => s.trim());
             const startPos = getTimePosition(start);
             const endPos = getTimePosition(end);
-            return Math.max(40, endPos - startPos);
-        } catch { return 80; }
+            return Math.max(20, endPos - startPos);
+        } catch { return PX_PER_HOUR; }
     };
 
     // Calculate current time position for red line indicator
@@ -182,57 +184,50 @@ export default function CalendrierPage() {
         const hours = now.getHours();
         const minutes = now.getMinutes();
         const decimalHour = hours + minutes / 60;
-        return Math.max(0, (decimalHour - 8) * 80);
+        return Math.max(0, (decimalHour - 8) * PX_PER_HOUR);
     };
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden bg-slate-50/30 dark:bg-slate-950 transition-colors duration-500 selection:bg-primary/10">
+        <div className="h-screen flex flex-col overflow-hidden bg-slate-50/30 dark:bg-slate-950 transition-colors duration-500 selection:bg-primary/10 text-xs">
             <Navbar user={user} />
 
-            <main className="flex-1 flex flex-col min-h-0 w-full max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-10 py-4 lg:py-6">
-                {/* Superior Header */}
-                <div className="flex-none flex flex-col xl:flex-row xl:items-end justify-between mb-6 lg:mb-8 gap-4 lg:gap-8">
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-                        <div className="flex items-center gap-3">
-                            {period !== 'today' && (
-                                <div className="bg-slate-900 dark:bg-primary/20 dark:text-primary dark:border dark:border-primary/30 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
-                                    Vue {period}
-                                </div>
-                            )}
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
-                            Art&apos;Beau <span className="text-primary">Calendar</span>
+            <main className="flex-1 flex flex-col min-h-0 w-full max-w-[1700px] mx-auto px-2 lg:px-4 py-2">
+                {/* Superior Header - COMPACT */}
+                <div className="flex-none flex items-center justify-between mb-2 gap-4">
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">
+                            Art&apos;Beau <span className="text-primary">Cal.</span>
                         </h3>
-                        <div className="flex items-center gap-4 bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-fit">
-                            <button onClick={prev} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
-                            <span className="text-sm font-black text-slate-700 dark:text-slate-300 min-w-[180px] text-center capitalize">{dayLabel}</span>
-                            <button onClick={next} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronRight className="w-5 h-5 text-slate-400" /></button>
+                        <div className="flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <button onClick={prev} className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronLeft className="w-4 h-4 text-slate-400" /></button>
+                            <span className="text-xs font-black text-slate-700 dark:text-slate-300 min-w-[120px] text-center capitalize">{dayLabel}</span>
+                            <button onClick={next} className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronRight className="w-4 h-4 text-slate-400" /></button>
                         </div>
                     </motion.div>
 
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-8 bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-800">
-                        <div className="flex -space-x-3">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-4 bg-white dark:bg-slate-900 p-2 px-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                        <div className="flex -space-x-2">
                             {teamMembers.slice(0, 5).map((m) => (
-                                <div key={m.username} className="h-12 w-12 rounded-2xl ring-4 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase">
+                                <div key={m.username} className="h-8 w-8 rounded-lg ring-2 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase">
                                     {m.prenom[0]}{m.nom[0]}
                                 </div>
                             ))}
                             {teamMembers.length > 5 && (
-                                <div className="h-12 w-12 rounded-2xl ring-4 ring-white dark:ring-slate-900 bg-slate-900 dark:bg-primary text-white text-xs font-black flex items-center justify-center">
+                                <div className="h-8 w-8 rounded-lg ring-2 ring-white dark:ring-slate-900 bg-slate-900 dark:bg-primary text-white text-[10px] font-black flex items-center justify-center">
                                     +{teamMembers.length - 5}
                                 </div>
                             )}
                         </div>
-                        <div className="h-10 w-px bg-slate-100 dark:bg-slate-800" />
+                        <div className="h-6 w-px bg-slate-100 dark:bg-slate-800" />
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Equipe Active</span>
-                            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{teamMembers.length} Collaborateurs</span>
+                            <span className="text-[8px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Active</span>
+                            <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">{teamMembers.length}</span>
                         </div>
                     </motion.div>
                 </div>
 
-                {/* Pro Filters */}
-                <div className="flex-none mb-4 lg:mb-6 z-40">
+                {/* Pro Filters - COMPACT */}
+                <div className="flex-none mb-2 z-40 transform scale-90 origin-top-left">
                     <FilterBar
                         period={period}
                         setPeriod={setPeriod}
@@ -253,21 +248,20 @@ export default function CalendrierPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
-                                className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-[2rem] lg:rounded-[3rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-800 overflow-hidden"
+                                className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 overflow-hidden"
                             >
                                 <div className="flex-none flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sticky top-0 z-30 backdrop-blur-md">
-                                    <div className="w-[70px] sm:w-20 lg:w-32 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-2 sm:p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/50">
-                                        <Clock className="w-4 h-4 lg:w-6 lg:h-6 text-slate-300 dark:text-slate-600" />
+                                    <div className="w-16 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-2 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/50">
+                                        <Clock className="w-4 h-4 text-slate-300 dark:text-slate-600" />
                                     </div>
                                     <div className="flex flex-1 overflow-x-auto no-scrollbar scroll-smooth">
                                         {teamMembers.map((member) => (
-                                            <div key={member.username} className="min-w-[140px] sm:min-w-[160px] lg:min-w-[220px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 p-3 sm:p-4 lg:p-8 flex flex-col items-center gap-2 lg:gap-4 hover:bg-white dark:hover:bg-slate-800 transition-colors">
-                                                <div className="h-8 w-8 sm:h-10 sm:w-10 lg:h-16 lg:w-16 rounded-lg sm:rounded-xl lg:rounded-[1.5rem] bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-xs sm:text-sm lg:text-xl font-black text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 uppercase">
+                                            <div key={member.username} className="min-w-[120px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 p-2 flex flex-col items-center gap-1 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                                                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 uppercase">
                                                     {member.prenom[0]}{member.nom[0]}
                                                 </div>
-                                                <div className="text-center space-y-0.5 lg:space-y-1">
-                                                    <h3 className="font-black text-slate-900 dark:text-white tracking-tight leading-none text-xs lg:text-lg">{member.prenom}</h3>
-                                                    <p className="text-[8px] lg:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{member.nom}</p>
+                                                <div className="text-center">
+                                                    <h3 className="font-bold text-slate-900 dark:text-white text-xs whitespace-nowrap">{member.prenom}</h3>
                                                 </div>
                                             </div>
                                         ))}
@@ -275,35 +269,34 @@ export default function CalendrierPage() {
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto custom-scrollbar relative bg-white/50 dark:bg-slate-900/50 flex">
-                                    <div className="w-[70px] sm:w-20 lg:w-32 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30 sticky left-0 z-20 backdrop-blur-md">
+                                    <div className="w-16 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30 sticky left-0 z-20 backdrop-blur-md">
                                         {HOURS.map((hour) => (
-                                            <div key={hour} className="h-20 flex items-start justify-center pt-3 border-b border-slate-50 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
-                                                <span className="text-[9px] sm:text-[10px] lg:text-[11px] font-black text-slate-400 dark:text-slate-600 tabular-nums">
+                                            <div key={hour} style={{ height: `${PX_PER_HOUR}px` }} className="flex items-start justify-center pt-1 border-b border-slate-50 dark:border-slate-800/50 bg-slate-50/80 dark:bg-slate-900/80">
+                                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-600 tabular-nums">
                                                     {hour.toString().padStart(2, '0')}:00
                                                 </span>
                                             </div>
                                         ))}
                                     </div>
 
-                                    <div className="flex flex-1 relative min-w-max lg:min-w-full">
+                                    <div className="flex flex-1 relative min-w-max">
                                         {HOURS.map((hour, i) => (
-                                            <div key={`line-${hour}`} style={{ top: `${i * 80}px` }} className="absolute left-0 right-0 h-px bg-slate-100/60 dark:bg-white/5 pointer-events-none" />
+                                            <div key={`line-${hour}`} style={{ top: `${i * PX_PER_HOUR}px` }} className="absolute left-0 right-0 h-px bg-slate-100/60 dark:bg-white/5 pointer-events-none" />
                                         ))}
 
-                                        {/* Current Time Indicator (Red Line) - Only show if viewing today */}
                                         {isToday(currentDate) && (
                                             <motion.div
                                                 initial={{ opacity: 0 }}
                                                 animate={{ opacity: 1 }}
                                                 style={{ top: `${getCurrentTimePosition()}px` }}
-                                                className="absolute left-0 right-0 h-0.5 bg-rose-500 dark:bg-rose-400 pointer-events-none z-30 shadow-lg shadow-rose-500/50"
+                                                className="absolute left-0 right-0 h-px bg-rose-500/80 dark:bg-rose-400/80 pointer-events-none z-30"
                                             >
-                                                <div className="absolute -left-2 -top-2 w-4 h-4 bg-rose-500 dark:bg-rose-400 rounded-full shadow-lg shadow-rose-500/50 animate-pulse" />
+                                                <div className="absolute -left-1 -top-1 w-2 h-2 bg-rose-500 dark:bg-rose-400 rounded-full animate-pulse" />
                                             </motion.div>
                                         )}
 
                                         {teamMembers.map((member) => (
-                                            <div key={`col-${member.username}`} className="min-w-[140px] sm:min-w-[160px] lg:min-w-[220px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 relative group">
+                                            <div key={`col-${member.username}`} className="min-w-[120px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 relative group">
                                                 <AnimatePresence>
                                                     {availability
                                                         .filter(a => a.user.username === member.username)
@@ -318,28 +311,23 @@ export default function CalendrierPage() {
                                                                     initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
                                                                     style={{ top: `${top}px`, height: `${height}px`, zIndex: 10 }}
                                                                     className={cn(
-                                                                        "absolute left-1.5 right-1.5 lg:left-3 lg:right-3 rounded-2xl lg:rounded-3xl p-3 lg:p-5 shadow-2xl shadow-black/5 flex flex-col justify-between overflow-hidden border-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]",
+                                                                        "absolute left-1 right-1 rounded-md p-1.5 shadow-sm flex flex-col justify-between overflow-hidden border transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]",
                                                                         item.statut === 'disponible' ? "bg-emerald-50 border-emerald-500/10 text-emerald-900" :
                                                                             item.statut === 'moyennement' ? "bg-amber-50 border-amber-500/10 text-amber-900" :
                                                                                 "bg-rose-50 border-rose-500/10 text-rose-900"
                                                                     )}
                                                                 >
-                                                                    <div className={cn("absolute top-0 left-0 bottom-0 w-2",
+                                                                    <div className={cn("absolute top-0 left-0 bottom-0 w-1",
                                                                         item.statut === 'disponible' ? "bg-emerald-500" :
                                                                             item.statut === 'moyennement' ? "bg-amber-500" : "bg-rose-500")} />
 
-                                                                    <div className="space-y-1">
-                                                                        <div className="flex items-center justify-between">
-                                                                            <span className="text-[9px] font-black uppercase tracking-widest opacity-40">{item.statut}</span>
-                                                                            {item.logeBg && <BedDouble className="w-4 h-4 text-primary animate-pulse" />}
+                                                                    <div className="pl-1.5 space-y-0.5">
+                                                                        <span className="text-[10px] font-bold tracking-tight leading-none block">{item.horaireText}</span>
+                                                                        <div className="flex items-center gap-1">
+                                                                            <span className="text-[8px] font-black uppercase tracking-widest opacity-40 leading-none">{item.statut.slice(0, 4)}.</span>
+                                                                            {item.logeBg && <BedDouble className="w-3 h-3 text-primary" />}
                                                                         </div>
-                                                                        <p className="text-sm font-black tracking-tight">{item.horaireText}</p>
                                                                     </div>
-                                                                    {item.logeBg && (
-                                                                        <div className="mt-auto flex">
-                                                                            <span className="bg-primary text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">Dortoir</span>
-                                                                        </div>
-                                                                    )}
                                                                 </motion.div>
                                                             );
                                                         })
@@ -351,17 +339,17 @@ export default function CalendrierPage() {
                                 </div>
                             </motion.div>
                         ) : period === 'week' ? (
-                            /* WEEK: Collaborative Matrix View */
+                            /* WEEK: Collaborative Matrix View - COMPACT */
                             <motion.div
                                 key="view-week"
                                 initial={{ opacity: 0, scale: 0.98 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 0.98 }}
-                                className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-[2rem] lg:rounded-[3rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-800 overflow-hidden"
+                                className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-800 overflow-hidden"
                             >
                                 <div className="flex-none flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sticky top-0 z-30 backdrop-blur-md">
-                                    <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/50 font-black text-[10px] text-slate-300 dark:text-slate-600 uppercase tracking-widest">
-                                        Collaborateur
+                                    <div className="w-24 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-2 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/50 font-black text-[9px] text-slate-300 dark:text-slate-600 uppercase tracking-widest">
+                                        Collab.
                                     </div>
                                     <div className="flex flex-1">
                                         {eachDayOfInterval({
@@ -369,11 +357,11 @@ export default function CalendrierPage() {
                                             end: endOfWeek(currentDate, { weekStartsOn: 1 })
                                         }).map((day: Date, i: number) => (
                                             <div key={i} className={cn(
-                                                "flex-1 border-r border-slate-100/50 dark:border-slate-800/50 p-4 lg:p-6 flex flex-col items-center gap-1 min-w-[100px]",
+                                                "flex-1 border-r border-slate-100/50 dark:border-slate-800/50 p-2 flex flex-col items-center gap-0.5 min-w-[60px]",
                                                 isToday(day) ? "bg-primary/5 dark:bg-primary/10" : ""
                                             )}>
-                                                <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{format(day, 'EEE', { locale: fr })}</span>
-                                                <span className={cn("text-lg font-black tracking-tight", isToday(day) ? "text-primary" : "text-slate-900 dark:text-white")}>{format(day, 'dd')}</span>
+                                                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{format(day, 'EEE', { locale: fr }).slice(0, 3)}</span>
+                                                <span className={cn("text-sm font-black tracking-tight", isToday(day) ? "text-primary" : "text-slate-900 dark:text-white")}>{format(day, 'dd')}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -381,14 +369,13 @@ export default function CalendrierPage() {
 
                                 <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-slate-100 dark:divide-slate-800">
                                     {teamMembers.map((member) => (
-                                        <div key={member.username} className="flex min-h-[120px] group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                                            <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center gap-3">
-                                                <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 uppercase">
+                                        <div key={member.username} className="flex min-h-[60px] group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                            <div className="w-24 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-2 flex flex-col items-center justify-center gap-1">
+                                                <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 uppercase">
                                                     {member.prenom[0]}{member.nom[0]}
                                                 </div>
                                                 <div className="text-center">
-                                                    <h4 className="font-black text-slate-900 dark:text-white text-[11px] lg:text-sm leading-none">{member.prenom}</h4>
-                                                    <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{member.nom}</p>
+                                                    <h4 className="font-bold text-slate-900 dark:text-white text-[10px] leading-none">{member.prenom}</h4>
                                                 </div>
                                             </div>
                                             <div className="flex flex-1">
@@ -403,22 +390,18 @@ export default function CalendrierPage() {
 
                                                     return (
                                                         <div key={i} className={cn(
-                                                            "flex-1 border-r border-slate-100/30 dark:border-slate-800/30 p-2 lg:p-4 min-w-[100px] relative",
+                                                            "flex-1 border-r border-slate-100/30 dark:border-slate-800/30 p-1 relative min-w-[60px]",
                                                             isToday(day) ? "bg-primary/5 dark:bg-primary/10" : ""
                                                         )}>
-                                                            <div className="space-y-2">
+                                                            <div className="space-y-1">
                                                                 {dailyAvail.map(a => (
                                                                     <div key={a.id} className={cn(
-                                                                        "p-2 lg:p-3 rounded-xl lg:rounded-2xl border flex flex-col gap-1 shadow-sm",
+                                                                        "p-1 rounded-md border flex flex-col gap-0 shadow-sm",
                                                                         a.statut === 'disponible' ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500/10 text-emerald-900 dark:text-emerald-400" :
                                                                             a.statut === 'moyennement' ? "bg-amber-50 dark:bg-amber-500/10 border-amber-500/10 text-amber-900 dark:text-amber-400" :
                                                                                 "bg-rose-50 dark:bg-rose-500/10 border-rose-500/10 text-rose-900 dark:text-rose-400"
                                                                     )}>
-                                                                        <div className="flex items-center justify-between">
-                                                                            <span className="text-[8px] font-black uppercase tracking-widest opacity-40">{a.horaireText}</span>
-                                                                            {a.logeBg && <BedDouble className="w-3 h-3 text-primary" />}
-                                                                        </div>
-                                                                        <span className="text-[10px] font-black capitalize">{a.statut}</span>
+                                                                        <span className="text-[9px] font-bold">{a.horaireText}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>
