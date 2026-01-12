@@ -48,6 +48,24 @@ interface AvailabilityData {
 const HOURS = Array.from({ length: 15 }, (_, i) => i + 8); // 08:00 to 22:00
 const PX_PER_HOUR = 50; // Compact height
 
+// Recurring Events Configuration
+const RECURRING_EVENTS = {
+    brainstorming: {
+        days: [1, 2, 3, 4, 5], // Mon-Fri
+        startHour: 15,
+        endHour: 17,
+        label: 'Brainstorming',
+        color: 'bg-purple-500/20 border-purple-500/30 text-purple-700 dark:text-purple-300'
+    },
+    weekly: {
+        days: [6], // Saturday
+        startHour: 11,
+        endHour: 14,
+        label: 'Weekly',
+        color: 'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300'
+    }
+};
+
 export default function CalendrierPage() {
     // ... state ...
     const [user, setUser] = useState<{ nom: string; prenom: string; username: string } | null>(null);
@@ -187,6 +205,20 @@ export default function CalendrierPage() {
         return Math.max(0, (decimalHour - 8) * PX_PER_HOUR);
     };
 
+    // Check if a date has recurring events
+    const getRecurringEventsForDate = (date: Date): Array<{ key: string; days: number[]; startHour: number; endHour: number; label: string; color: string }> => {
+        const dayOfWeek = date.getDay();
+        const events: Array<{ key: string; days: number[]; startHour: number; endHour: number; label: string; color: string }> = [];
+
+        Object.entries(RECURRING_EVENTS).forEach(([key, event]) => {
+            if (event.days.includes(dayOfWeek)) {
+                events.push({ ...event, key });
+            }
+        });
+
+        return events;
+    };
+
     return (
         <div className="h-screen flex flex-col overflow-hidden bg-slate-50/30 dark:bg-slate-950 transition-colors duration-500 selection:bg-primary/10 text-xs">
             <Navbar user={user} />
@@ -224,6 +256,31 @@ export default function CalendrierPage() {
                             <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">{teamMembers.length}</span>
                         </div>
                     </motion.div>
+                </div>
+
+                {/* Legend - COMPACT */}
+                <div className="flex-none mb-2 flex items-center gap-2 text-[9px] font-bold">
+                    <span className="text-slate-400 uppercase tracking-wider">Légende:</span>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        Disponible
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        <div className="w-2 h-2 rounded-full bg-amber-500"></div>
+                        Partiel
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                        <div className="w-2 h-2 rounded-full bg-rose-500"></div>
+                        Absent
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+                        <CalendarIcon className="w-2.5 h-2.5" />
+                        Brainstorm
+                    </div>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        <Users className="w-2.5 h-2.5" />
+                        Weekly
+                    </div>
                 </div>
 
                 {/* Pro Filters - COMPACT */}
@@ -294,6 +351,24 @@ export default function CalendrierPage() {
                                                 <div className="absolute -left-1 -top-1 w-2 h-2 bg-rose-500 dark:bg-rose-400 rounded-full animate-pulse" />
                                             </motion.div>
                                         )}
+
+                                        {/* Recurring Events Background Layer */}
+                                        {getRecurringEventsForDate(currentDate).map((event) => {
+                                            const top = (event.startHour - 8) * PX_PER_HOUR;
+                                            const height = (event.endHour - event.startHour) * PX_PER_HOUR;
+                                            return (
+                                                <div
+                                                    key={event.key}
+                                                    style={{ top: `${top}px`, height: `${height}px` }}
+                                                    className={cn(
+                                                        "absolute left-0 right-0 border-2 border-dashed pointer-events-none z-0 flex items-center justify-center",
+                                                        event.color
+                                                    )}
+                                                >
+                                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-50">{event.label}</span>
+                                                </div>
+                                            );
+                                        })}
 
                                         {teamMembers.map((member) => (
                                             <div key={`col-${member.username}`} className="min-w-[120px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 relative group">
@@ -387,6 +462,7 @@ export default function CalendrierPage() {
                                                         a.user.username === member.username &&
                                                         isSameDay(new Date(a.dateDebut), day)
                                                     );
+                                                    const recurringEvents = getRecurringEventsForDate(day);
 
                                                     return (
                                                         <div key={i} className={cn(
@@ -394,6 +470,16 @@ export default function CalendrierPage() {
                                                             isToday(day) ? "bg-primary/5 dark:bg-primary/10" : ""
                                                         )}>
                                                             <div className="space-y-1">
+                                                                {/* Recurring Events */}
+                                                                {recurringEvents.map(event => (
+                                                                    <div key={event.key} className={cn(
+                                                                        "p-1 rounded border-2 border-dashed flex items-center justify-center",
+                                                                        event.color
+                                                                    )}>
+                                                                        <span className="text-[8px] font-black uppercase tracking-wider opacity-60">{event.label}</span>
+                                                                    </div>
+                                                                ))}
+                                                                {/* User Availability */}
                                                                 {dailyAvail.map(a => (
                                                                     <div key={a.id} className={cn(
                                                                         "p-1 rounded-md border flex flex-col gap-0 shadow-sm",
