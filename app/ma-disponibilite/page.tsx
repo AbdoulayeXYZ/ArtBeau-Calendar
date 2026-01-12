@@ -177,25 +177,26 @@ export default function MaDisponibilitePage() {
                         <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl shadow-slate-200/40 dark:shadow-black/20 border border-slate-100 dark:border-slate-800 p-6 lg:p-12 space-y-8 lg:space-y-12">
 
                             {/* Statue & Details Header */}
-                            <div className="flex flex-col sm:flex-row items-center gap-6 p-1 bg-slate-50 rounded-[2rem]">
+                            <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-row sm:items-center sm:gap-6 p-1 bg-slate-50 dark:bg-slate-800/50 rounded-[1.5rem] sm:rounded-[2rem]">
                                 {[
-                                    { id: 'disponible', label: 'Disponible', color: 'emerald', icon: CheckCircle2 },
-                                    { id: 'moyennement', label: 'Partiel', color: 'amber', icon: AlertCircle },
-                                    { id: 'indisponible', label: 'Absent', color: 'rose', icon: X }
+                                    { id: 'disponible', label: 'Dispo', fullLabel: 'Disponible', color: 'emerald', icon: CheckCircle2 },
+                                    { id: 'moyennement', label: 'Partiel', fullLabel: 'Partiel', color: 'amber', icon: AlertCircle },
+                                    { id: 'indisponible', label: 'Absent', fullLabel: 'Absent', color: 'rose', icon: X }
                                 ].map((s) => (
                                     <button
                                         key={s.id}
                                         type="button"
                                         onClick={() => setStatut(s.id as any)}
                                         className={cn(
-                                            "flex-1 w-full flex items-center justify-center gap-3 py-4 rounded-[1.8rem] text-sm font-black uppercase tracking-widest transition-all",
+                                            "flex-1 w-full flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-3 py-3 sm:py-4 rounded-[1.2rem] sm:rounded-[1.8rem] text-[10px] sm:text-sm font-black uppercase tracking-widest transition-all",
                                             statut === s.id
-                                                ? `bg-white dark:bg-slate-800 text-${s.color}-600 dark:text-${s.color}-400 shadow-xl`
+                                                ? `bg-white dark:bg-slate-800 text-${s.color}-600 dark:text-${s.color}-400 shadow-lg sm:shadow-xl ring-2 sm:ring-0 ring-white dark:ring-slate-700`
                                                 : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                                         )}
                                     >
-                                        <s.icon className={cn("w-5 h-5", statut === s.id ? `text-${s.color}-500` : "text-slate-300 dark:text-slate-600")} />
-                                        {s.label}
+                                        <s.icon className={cn("w-4 h-4 sm:w-5 sm:h-5", statut === s.id ? `text-${s.color}-500` : "text-slate-300 dark:text-slate-600")} />
+                                        <span className="hidden sm:inline">{s.fullLabel}</span>
+                                        <span className="sm:hidden">{s.label}</span>
                                     </button>
                                 ))}
                             </div>
@@ -265,7 +266,7 @@ export default function MaDisponibilitePage() {
                                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Plage horaire</label>
                                     </div>
 
-                                    <div className="bg-slate-900 rounded-[2.5rem] p-6 lg:p-8 text-white space-y-6 shadow-2xl shadow-slate-900/40 relative overflow-hidden">
+                                    <div className="bg-slate-900 rounded-[2rem] lg:rounded-[2.5rem] p-5 lg:p-8 text-white space-y-4 lg:space-y-6 shadow-2xl shadow-slate-900/40 relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[80px] rounded-full" />
                                         <div className="relative z-10 flex flex-col gap-4 lg:gap-6">
                                             <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10">
@@ -387,19 +388,19 @@ export default function MaDisponibilitePage() {
                                                         )}
                                                     </div>
 
-                                                    <div className="flex items-center gap-6 flex-wrap">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Du au</span>
-                                                            <p className="font-black text-slate-900 dark:text-white text-base lg:text-lg tracking-tight">
+                                                    <div className="flex items-center gap-2 sm:gap-6 flex-wrap mt-2 sm:mt-0">
+                                                        <div className="flex flex-col min-w-[120px]">
+                                                            <span className="text-[9px] sm:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Du au</span>
+                                                            <p className="font-black text-slate-900 dark:text-white text-sm sm:text-base lg:text-lg tracking-tight whitespace-nowrap">
                                                                 {format(new Date(item.dateDebut), 'dd MMM', { locale: fr })}
-                                                                <span className="mx-2 text-slate-200 dark:text-slate-700">—</span>
+                                                                <span className="mx-1.5 sm:mx-2 text-slate-200 dark:text-slate-700">—</span>
                                                                 {format(new Date(item.dateFin), 'dd MMM', { locale: fr })}
                                                             </p>
                                                         </div>
-                                                        <div className="h-8 w-px bg-slate-100 dark:bg-slate-800" />
+                                                        <div className="hidden sm:block h-8 w-px bg-slate-100 dark:bg-slate-800" />
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Horaire</span>
-                                                            <p className="font-bold text-slate-600 dark:text-slate-400">
+                                                            <span className="text-[9px] sm:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Horaire</span>
+                                                            <p className="font-bold text-slate-600 dark:text-slate-400 text-sm sm:text-base">
                                                                 {item.horaireText}
                                                             </p>
                                                         </div>
