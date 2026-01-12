@@ -23,8 +23,6 @@ import {
     addWeeks,
     subWeeks,
     isToday,
-    addMonths,
-    subMonths,
     eachDayOfInterval,
     isSameDay
 } from 'date-fns';
@@ -90,14 +88,36 @@ export default function CalendrierPage() {
             if (logeBgOnly) params.append('loge_bg', 'true');
             if (availableNowOnly) params.append('available_now', 'true');
 
-            // If we're not on 'today', we might need to send a date reference
-            // The current API might need adjustment to handle specific date ranges, 
-            // but for now we rely on the existing params.
-
             const response = await fetch(`/api/availability?${params.toString()}`);
             if (response.ok) {
                 const data = await response.json();
-                setAvailability(data.availability);
+                let results = data.availability;
+
+                // Apply client-side time filtering for "available now"
+                if (availableNowOnly) {
+                    const now = new Date();
+                    const currentHour = now.getHours();
+                    const currentMinute = now.getMinutes();
+                    const currentTimeDecimal = currentHour + currentMinute / 60;
+
+                    results = results.filter((a: AvailabilityData) => {
+                        if (!a.horaireText || !a.horaireText.includes('-')) return false;
+
+                        try {
+                            const [start, end] = a.horaireText.split('-').map(s => s.trim());
+                            const [startH, startM] = start.split(':').map(Number);
+                            const [endH, endM] = end.split(':').map(Number);
+                            const startTimeDecimal = startH + (startM || 0) / 60;
+                            const endTimeDecimal = endH + (endM || 0) / 60;
+
+                            return currentTimeDecimal >= startTimeDecimal && currentTimeDecimal <= endTimeDecimal;
+                        } catch {
+                            return false;
+                        }
+                    });
+                }
+
+                setAvailability(results);
             }
         } catch (error) {
             console.error('Fetch availability error:', error);
@@ -120,12 +140,10 @@ export default function CalendrierPage() {
     const next = () => {
         if (period === 'today') setCurrentDate(d => addDays(d, 1));
         if (period === 'week') setCurrentDate(d => addWeeks(d, 1));
-        if (period === 'month') setCurrentDate(d => addMonths(d, 1));
     };
     const prev = () => {
         if (period === 'today') setCurrentDate(d => addDays(d, -1));
         if (period === 'week') setCurrentDate(d => subWeeks(d, 1));
-        if (period === 'month') setCurrentDate(d => subMonths(d, 1));
     };
 
     const dayLabel = useMemo(() => {
@@ -135,7 +153,7 @@ export default function CalendrierPage() {
             const end = endOfWeek(currentDate, { weekStartsOn: 1 });
             return `${format(start, 'd')} - ${format(end, 'd MMMM yyyy', { locale: fr })}`;
         }
-        return format(currentDate, 'MMMM yyyy', { locale: fr });
+        return '';
     }, [currentDate, period]);
 
     // Grid Calc Helpers
@@ -158,8 +176,17 @@ export default function CalendrierPage() {
         } catch { return 80; }
     };
 
+    // Calculate current time position for red line indicator
+    const getCurrentTimePosition = () => {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const decimalHour = hours + minutes / 60;
+        return Math.max(0, (decimalHour - 8) * 80);
+    };
+
     return (
-        <div className="min-h-screen bg-slate-50/30 selection:bg-primary/10">
+        <div className="min-h-screen bg-slate-50/30 dark:bg-slate-950 transition-colors duration-500 selection:bg-primary/10">
             <Navbar user={user} />
 
             <main className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-10 py-8 lg:py-12">
@@ -172,38 +199,38 @@ export default function CalendrierPage() {
                                 Live Dashboard
                             </div>
                             {period !== 'today' && (
-                                <div className="bg-slate-900 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
+                                <div className="bg-slate-900 dark:bg-primary/20 dark:text-primary dark:border dark:border-primary/30 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">
                                     Vue {period}
                                 </div>
                             )}
                         </div>
-                        <h1 className="text-5xl font-black text-slate-900 tracking-tighter">
-                            Art&apos;Beau <span className="text-primary italic">Calendar</span>
-                        </h1>
-                        <div className="flex items-center gap-4 bg-white px-6 py-3 rounded-2xl shadow-sm border border-slate-100 w-fit">
-                            <button onClick={prev} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
-                            <span className="text-sm font-black text-slate-700 min-w-[180px] text-center capitalize">{dayLabel}</span>
-                            <button onClick={next} className="p-2 hover:bg-slate-50 rounded-full transition-colors"><ChevronRight className="w-5 h-5 text-slate-400" /></button>
+                        <h2 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
+                            Art&apos;Beau <span className="text-primary">Calendar</span>
+                        </h2>
+                        <div className="flex items-center gap-4 bg-white dark:bg-slate-900 px-6 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 w-fit">
+                            <button onClick={prev} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronLeft className="w-5 h-5 text-slate-400" /></button>
+                            <span className="text-sm font-black text-slate-700 dark:text-slate-300 min-w-[180px] text-center capitalize">{dayLabel}</span>
+                            <button onClick={next} className="p-2 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronRight className="w-5 h-5 text-slate-400" /></button>
                         </div>
                     </motion.div>
 
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-8 bg-white p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-8 bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-800">
                         <div className="flex -space-x-3">
                             {teamMembers.slice(0, 5).map((m) => (
-                                <div key={m.username} className="h-12 w-12 rounded-2xl ring-4 ring-white bg-slate-100 flex items-center justify-center font-black text-sm text-slate-600 border border-slate-200 uppercase">
+                                <div key={m.username} className="h-12 w-12 rounded-2xl ring-4 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-sm text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase">
                                     {m.prenom[0]}{m.nom[0]}
                                 </div>
                             ))}
                             {teamMembers.length > 5 && (
-                                <div className="h-12 w-12 rounded-2xl ring-4 ring-white bg-slate-900 text-white text-xs font-black flex items-center justify-center">
+                                <div className="h-12 w-12 rounded-2xl ring-4 ring-white dark:ring-slate-900 bg-slate-900 dark:bg-primary text-white text-xs font-black flex items-center justify-center">
                                     +{teamMembers.length - 5}
                                 </div>
                             )}
                         </div>
-                        <div className="h-10 w-px bg-slate-100" />
+                        <div className="h-10 w-px bg-slate-100 dark:bg-slate-800" />
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Equipe Active</span>
-                            <span className="text-2xl font-black text-slate-900 tracking-tight">{teamMembers.length} Collaborateurs</span>
+                            <span className="text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Equipe Active</span>
+                            <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{teamMembers.length} Collaborateurs</span>
                         </div>
                     </motion.div>
                 </div>
@@ -229,32 +256,32 @@ export default function CalendrierPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="relative bg-white rounded-[2rem] lg:rounded-[4rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
+                            className="relative bg-white dark:bg-slate-900 rounded-[2rem] lg:rounded-[4rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-800 overflow-hidden"
                         >
-                            <div className="flex border-b border-slate-100 bg-slate-50/50 sticky top-0 z-30 backdrop-blur-md">
-                                <div className="w-20 sm:w-32 flex-shrink-0 border-r border-slate-100 p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50">
-                                    <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300" />
+                            <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sticky top-0 z-30 backdrop-blur-md">
+                                <div className="w-20 sm:w-32 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/50">
+                                    <Clock className="w-5 h-5 lg:w-6 lg:h-6 text-slate-300 dark:text-slate-600" />
                                 </div>
                                 <div className="flex flex-1 overflow-x-auto no-scrollbar scroll-smooth">
                                     {teamMembers.map((member) => (
-                                        <div key={member.username} className="min-w-[160px] lg:min-w-[220px] flex-1 border-r border-slate-100/50 p-4 lg:p-8 flex flex-col items-center gap-2 lg:gap-4 hover:bg-white transition-colors">
-                                            <div className="h-10 w-10 lg:h-16 lg:w-16 rounded-xl lg:rounded-[1.5rem] bg-gradient-to-br from-slate-50 to-slate-200 flex items-center justify-center text-sm lg:text-xl font-black text-slate-700 shadow-sm border border-slate-200 uppercase">
+                                        <div key={member.username} className="min-w-[160px] lg:min-w-[220px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 p-4 lg:p-8 flex flex-col items-center gap-2 lg:gap-4 hover:bg-white dark:hover:bg-slate-800 transition-colors">
+                                            <div className="h-10 w-10 lg:h-16 lg:w-16 rounded-xl lg:rounded-[1.5rem] bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-sm lg:text-xl font-black text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 uppercase">
                                                 {member.prenom[0]}{member.nom[0]}
                                             </div>
                                             <div className="text-center space-y-0.5 lg:space-y-1">
-                                                <h3 className="font-black text-slate-900 tracking-tight leading-none text-xs lg:text-lg">{member.prenom}</h3>
-                                                <p className="text-[8px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{member.nom}</p>
+                                                <h3 className="font-black text-slate-900 dark:text-white tracking-tight leading-none text-xs lg:text-lg">{member.prenom}</h3>
+                                                <p className="text-[8px] lg:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{member.nom}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="flex h-[600px] lg:h-[800px] overflow-y-auto custom-scrollbar relative bg-white/50">
-                                <div className="w-20 sm:w-32 flex-shrink-0 border-r border-slate-100 bg-slate-50/30 sticky left-0 z-20 backdrop-blur-md">
+                            <div className="flex h-[600px] lg:h-[800px] overflow-y-auto custom-scrollbar relative bg-white/50 dark:bg-slate-900/50">
+                                <div className="w-20 sm:w-32 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30 sticky left-0 z-20 backdrop-blur-md">
                                     {HOURS.map((hour) => (
-                                        <div key={hour} className="h-20 flex items-start justify-center pt-3 border-b border-slate-50 bg-slate-50/80">
-                                            <span className="text-[10px] lg:text-[11px] font-black text-slate-400 tabular-nums">
+                                        <div key={hour} className="h-20 flex items-start justify-center pt-3 border-b border-slate-50 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80">
+                                            <span className="text-[10px] lg:text-[11px] font-black text-slate-400 dark:text-slate-600 tabular-nums">
                                                 {hour.toString().padStart(2, '0')}:00
                                             </span>
                                         </div>
@@ -263,11 +290,23 @@ export default function CalendrierPage() {
 
                                 <div className="flex flex-1 relative min-w-max lg:min-w-full">
                                     {HOURS.map((hour, i) => (
-                                        <div key={`line-${hour}`} style={{ top: `${i * 80}px` }} className="absolute left-0 right-0 h-px bg-slate-100/60 pointer-events-none" />
+                                        <div key={`line-${hour}`} style={{ top: `${i * 80}px` }} className="absolute left-0 right-0 h-px bg-slate-100/60 dark:bg-white/5 pointer-events-none" />
                                     ))}
 
+                                    {/* Current Time Indicator (Red Line) - Only show if viewing today */}
+                                    {isToday(currentDate) && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            style={{ top: `${getCurrentTimePosition()}px` }}
+                                            className="absolute left-0 right-0 h-0.5 bg-rose-500 dark:bg-rose-400 pointer-events-none z-30 shadow-lg shadow-rose-500/50"
+                                        >
+                                            <div className="absolute -left-2 -top-2 w-4 h-4 bg-rose-500 dark:bg-rose-400 rounded-full shadow-lg shadow-rose-500/50 animate-pulse" />
+                                        </motion.div>
+                                    )}
+
                                     {teamMembers.map((member) => (
-                                        <div key={`col-${member.username}`} className="min-w-[160px] lg:min-w-[220px] flex-1 border-r border-slate-100/50 relative group">
+                                        <div key={`col-${member.username}`} className="min-w-[160px] lg:min-w-[220px] flex-1 border-r border-slate-100/50 dark:border-slate-800/50 relative group">
                                             <AnimatePresence>
                                                 {availability
                                                     .filter(a => a.user.username === member.username)
@@ -321,10 +360,10 @@ export default function CalendrierPage() {
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.98 }}
-                            className="bg-white rounded-[2rem] lg:rounded-[4rem] shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden"
+                            className="bg-white dark:bg-slate-900 rounded-[2rem] lg:rounded-[4rem] shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-800 overflow-hidden"
                         >
-                            <div className="flex border-b border-slate-100 bg-slate-50/50 sticky top-0 z-30 backdrop-blur-md">
-                                <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50 font-black text-[10px] text-slate-300 uppercase tracking-widest">
+                            <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 sticky top-0 z-30 backdrop-blur-md">
+                                <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-4 lg:p-6 flex flex-col items-center justify-center bg-slate-50/50 dark:bg-slate-900/50 font-black text-[10px] text-slate-300 dark:text-slate-600 uppercase tracking-widest">
                                     Collaborateur
                                 </div>
                                 <div className="flex flex-1">
@@ -333,26 +372,26 @@ export default function CalendrierPage() {
                                         end: endOfWeek(currentDate, { weekStartsOn: 1 })
                                     }).map((day: Date, i: number) => (
                                         <div key={i} className={cn(
-                                            "flex-1 border-r border-slate-100/50 p-4 lg:p-6 flex flex-col items-center gap-1 min-w-[100px]",
-                                            isToday(day) ? "bg-primary/5" : ""
+                                            "flex-1 border-r border-slate-100/50 dark:border-slate-800/50 p-4 lg:p-6 flex flex-col items-center gap-1 min-w-[100px]",
+                                            isToday(day) ? "bg-primary/5 dark:bg-primary/10" : ""
                                         )}>
-                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{format(day, 'EEE', { locale: fr })}</span>
-                                            <span className={cn("text-lg font-black tracking-tight", isToday(day) ? "text-primary" : "text-slate-900")}>{format(day, 'dd')}</span>
+                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">{format(day, 'EEE', { locale: fr })}</span>
+                                            <span className={cn("text-lg font-black tracking-tight", isToday(day) ? "text-primary" : "text-slate-900 dark:text-white")}>{format(day, 'dd')}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {teamMembers.map((member) => (
-                                    <div key={member.username} className="flex min-h-[120px] group hover:bg-slate-50/50 transition-colors">
-                                        <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 p-6 flex flex-col items-center justify-center gap-3">
-                                            <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 flex items-center justify-center text-xs lg:text-sm font-black text-slate-700 shadow-sm border border-slate-200 uppercase">
+                                    <div key={member.username} className="flex min-h-[120px] group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                        <div className="w-32 lg:w-48 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 p-6 flex flex-col items-center justify-center gap-3">
+                                            <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-xs lg:text-sm font-black text-slate-700 dark:text-slate-300 shadow-sm border border-slate-200 dark:border-slate-700 uppercase">
                                                 {member.prenom[0]}{member.nom[0]}
                                             </div>
                                             <div className="text-center">
-                                                <h4 className="font-black text-slate-900 text-[11px] lg:text-sm leading-none">{member.prenom}</h4>
-                                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{member.nom}</p>
+                                                <h4 className="font-black text-slate-900 dark:text-white text-[11px] lg:text-sm leading-none">{member.prenom}</h4>
+                                                <p className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{member.nom}</p>
                                             </div>
                                         </div>
                                         <div className="flex flex-1">
@@ -367,16 +406,16 @@ export default function CalendrierPage() {
 
                                                 return (
                                                     <div key={i} className={cn(
-                                                        "flex-1 border-r border-slate-100/30 p-2 lg:p-4 min-w-[100px] relative",
-                                                        isToday(day) ? "bg-primary/5" : ""
+                                                        "flex-1 border-r border-slate-100/30 dark:border-slate-800/30 p-2 lg:p-4 min-w-[100px] relative",
+                                                        isToday(day) ? "bg-primary/5 dark:bg-primary/10" : ""
                                                     )}>
                                                         <div className="space-y-2">
                                                             {dailyAvail.map(a => (
                                                                 <div key={a.id} className={cn(
                                                                     "p-2 lg:p-3 rounded-xl lg:rounded-2xl border flex flex-col gap-1 shadow-sm",
-                                                                    a.statut === 'disponible' ? "bg-emerald-50 border-emerald-500/10 text-emerald-900" :
-                                                                        a.statut === 'moyennement' ? "bg-amber-50 border-amber-500/10 text-amber-900" :
-                                                                            "bg-rose-50 border-rose-500/10 text-rose-900"
+                                                                    a.statut === 'disponible' ? "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-500/10 text-emerald-900 dark:text-emerald-400" :
+                                                                        a.statut === 'moyennement' ? "bg-amber-50 dark:bg-amber-500/10 border-amber-500/10 text-amber-900 dark:text-amber-400" :
+                                                                            "bg-rose-50 dark:bg-rose-500/10 border-rose-500/10 text-rose-900 dark:text-rose-400"
                                                                 )}>
                                                                     <div className="flex items-center justify-between">
                                                                         <span className="text-[8px] font-black uppercase tracking-widest opacity-40">{a.horaireText}</span>
@@ -394,80 +433,27 @@ export default function CalendrierPage() {
                                 ))}
                             </div>
                         </motion.div>
-                    ) : (
-                        /* MONTH: Global Calendar View */
-                        <motion.div
-                            key="view-month"
-                            initial={{ opacity: 0, scale: 0.98 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            className="bg-white rounded-[4rem] p-12 border border-slate-100 shadow-2xl shadow-slate-200/50"
-                        >
-                            <div className="grid grid-cols-7 gap-6">
-                                {['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'].map(d => (
-                                    <div key={d} className="text-center text-xs font-black text-slate-300 uppercase tracking-widest pb-6">{d}</div>
-                                ))}
-                                {Array.from({ length: 31 }).map((_, i) => {
-                                    const dayNum = i + 1;
-                                    const dailyAvail = availability.filter(a => {
-                                        const start = new Date(a.dateDebut);
-                                        const end = new Date(a.dateFin);
-                                        const current = new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNum);
-                                        return current >= start && current <= end;
-                                    });
-
-                                    return (
-                                        <div key={i} className={cn(
-                                            "aspect-square rounded-[2rem] p-4 flex flex-col gap-2 transition-all hover:bg-slate-50 border border-transparent hover:border-slate-100",
-                                            isToday(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNum)) ? "bg-primary/5 border-primary/10" : "bg-white"
-                                        )}>
-                                            <span className={cn(
-                                                "text-xl font-black tabular-nums",
-                                                isToday(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNum)) ? "text-primary" : "text-slate-900"
-                                            )}>{dayNum}</span>
-
-                                            <div className="mt-auto space-y-1">
-                                                {dailyAvail.length > 0 && (
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {dailyAvail.slice(0, 3).map(a => (
-                                                            <div key={a.id} className={cn(
-                                                                "w-full h-1.5 rounded-full",
-                                                                a.statut === 'disponible' ? "bg-emerald-500" :
-                                                                    a.statut === 'moyennement' ? "bg-amber-500" : "bg-rose-500"
-                                                            )} />
-                                                        ))}
-                                                        {dailyAvail.length > 3 && (
-                                                            <span className="text-[8px] font-black text-slate-300">{dailyAvail.length}</span>
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </motion.div>
-                    )}
+                    ) : null}
                 </AnimatePresence>
 
                 {/* Legend */}
-                <div className="mt-16 bg-white/50 backdrop-blur-sm border border-white p-8 rounded-[3rem] flex flex-wrap items-center justify-center gap-12">
+                <div className="mt-16 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white dark:border-white/5 p-8 rounded-[3rem] flex flex-wrap items-center justify-center gap-12 text-slate-500 dark:text-slate-400">
                     <div className="flex items-center gap-3">
                         <div className="w-5 h-5 rounded-full bg-emerald-500 shadow-xl shadow-emerald-500/20" />
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Disponible</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Disponible</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="w-5 h-5 rounded-full bg-amber-500 shadow-xl shadow-amber-500/20" />
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Partiel</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Partiel</span>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="w-5 h-5 rounded-full bg-rose-500 shadow-xl shadow-rose-500/20" />
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Absent</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Absent</span>
                     </div>
-                    <div className="h-6 w-px bg-slate-200" />
+                    <div className="h-6 w-px bg-slate-200 dark:bg-slate-800" />
                     <div className="flex items-center gap-3">
                         <BedDouble className="w-5 h-5 text-primary" />
-                        <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Logement BG</span>
+                        <span className="text-xs font-black uppercase tracking-widest">Logement BG</span>
                     </div>
                 </div>
             </main>

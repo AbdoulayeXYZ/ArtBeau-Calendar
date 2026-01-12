@@ -148,7 +148,7 @@ export default function MaDisponibilitePage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50/50">
+        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 transition-colors duration-500">
             <Navbar user={user} />
 
             <main className="max-w-[1200px] mx-auto px-4 py-6 lg:py-16">
@@ -168,13 +168,13 @@ export default function MaDisponibilitePage() {
                                 <ChevronLeft className="w-4 h-4" />
                                 Retour
                             </button>
-                            <h1 className="text-3xl lg:text-5xl font-black text-slate-900 tracking-tighter">
+                            <h1 className="text-3xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tighter">
                                 Ma <span className="text-primary font-bold">Disponibilité</span>
                             </h1>
-                            <p className="text-slate-500 font-medium text-base lg:text-lg">Indiquez vos disponibilités pour que l&apos;équipe puisse s&apos;organiser.</p>
+                            <p className="text-slate-500 dark:text-slate-400 font-medium text-base lg:text-lg">Indiquez vos disponibilités pour que l&apos;équipe puisse s&apos;organiser.</p>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="bg-white rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl shadow-slate-200/40 border border-slate-100 p-6 lg:p-12 space-y-8 lg:space-y-12">
+                        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl shadow-slate-200/40 dark:shadow-black/20 border border-slate-100 dark:border-slate-800 p-6 lg:p-12 space-y-8 lg:space-y-12">
 
                             {/* Statue & Details Header */}
                             <div className="flex flex-col sm:flex-row items-center gap-6 p-1 bg-slate-50 rounded-[2rem]">
@@ -190,11 +190,11 @@ export default function MaDisponibilitePage() {
                                         className={cn(
                                             "flex-1 w-full flex items-center justify-center gap-3 py-4 rounded-[1.8rem] text-sm font-black uppercase tracking-widest transition-all",
                                             statut === s.id
-                                                ? `bg-white text-${s.color}-600 shadow-xl`
-                                                : "text-slate-400 hover:text-slate-600"
+                                                ? `bg-white dark:bg-slate-800 text-${s.color}-600 dark:text-${s.color}-400 shadow-xl`
+                                                : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                                         )}
                                     >
-                                        <s.icon className={cn("w-5 h-5", statut === s.id ? `text-${s.color}-500` : "text-slate-300")} />
+                                        <s.icon className={cn("w-5 h-5", statut === s.id ? `text-${s.color}-500` : "text-slate-300 dark:text-slate-600")} />
                                         {s.label}
                                     </button>
                                 ))}
@@ -211,7 +211,7 @@ export default function MaDisponibilitePage() {
                                         <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Période du planning</label>
                                     </div>
 
-                                    <div className="p-2 bg-slate-50 rounded-3xl flex gap-1 mb-4">
+                                    <div className="p-2 bg-slate-50 dark:bg-slate-800/50 rounded-3xl flex gap-1 mb-4">
                                         {['jour', 'semaine', 'mois'].map((m) => (
                                             <button
                                                 key={m}
@@ -219,7 +219,7 @@ export default function MaDisponibilitePage() {
                                                 onClick={() => setSelectionMode(m as any)}
                                                 className={cn(
                                                     "flex-1 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all",
-                                                    selectionMode === m ? "bg-white text-primary shadow-lg" : "text-slate-400 hover:text-slate-600"
+                                                    selectionMode === m ? "bg-white dark:bg-slate-800 text-primary shadow-lg" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                                                 )}
                                             >
                                                 {m}
@@ -234,7 +234,7 @@ export default function MaDisponibilitePage() {
                                                 type="date"
                                                 value={dateDebut}
                                                 onChange={(e) => setDateDebut(e.target.value)}
-                                                className="w-full pl-20 pr-6 py-5 bg-slate-50 border-2 border-slate-50 rounded-3xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-800"
+                                                className="w-full pl-20 pr-6 py-5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-800 rounded-3xl focus:bg-white dark:focus:bg-slate-700 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-800 dark:text-white"
                                                 required
                                             />
                                         </div>
@@ -267,14 +267,26 @@ export default function MaDisponibilitePage() {
                                     <div className="bg-slate-900 rounded-[2.5rem] p-6 lg:p-8 text-white space-y-6 shadow-2xl shadow-slate-900/40 relative overflow-hidden">
                                         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 blur-[80px] rounded-full" />
                                         <div className="relative z-10 flex flex-col gap-4 lg:gap-6">
-                                            <div className="flex items-center justify-between">
-                                                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="bg-transparent border-none text-xl lg:text-2xl font-black text-white focus:ring-0 p-0 w-20 lg:w-24" />
-                                                <div className="h-px w-6 lg:w-8 bg-white/20" />
-                                                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="bg-transparent border-none text-xl lg:text-2xl font-black text-white focus:ring-0 p-0 w-20 lg:w-24 text-right" />
-                                            </div>
-                                            <div className="flex justify-between text-[8px] lg:text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-                                                <span>Arrivée</span>
-                                                <span>Départ</span>
+                                            <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10">
+                                                <div className="flex-1 flex flex-col items-center">
+                                                    <input
+                                                        type="time"
+                                                        value={startTime}
+                                                        onChange={(e) => setStartTime(e.target.value)}
+                                                        className="bg-transparent border-none text-2xl lg:text-3xl font-black text-white focus:ring-0 p-0 w-full text-center cursor-pointer"
+                                                    />
+                                                    <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mt-1">Arrivée</span>
+                                                </div>
+                                                <div className="h-8 w-px bg-white/10 mx-4" />
+                                                <div className="flex-1 flex flex-col items-center">
+                                                    <input
+                                                        type="time"
+                                                        value={endTime}
+                                                        onChange={(e) => setEndTime(e.target.value)}
+                                                        className="bg-transparent border-none text-2xl lg:text-3xl font-black text-white focus:ring-0 p-0 w-full text-center cursor-pointer"
+                                                    />
+                                                    <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.2em] mt-1">Départ</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -285,7 +297,7 @@ export default function MaDisponibilitePage() {
                                         onClick={() => setLogeBg(!logeBg)}
                                         className={cn(
                                             "w-full p-6 rounded-[2rem] border-2 flex items-center justify-between transition-all group",
-                                            logeBg ? "border-primary bg-primary/5 text-primary shadow-xl shadow-primary/5" : "border-slate-100 bg-white text-slate-400 hover:border-slate-200"
+                                            logeBg ? "border-primary bg-primary/5 text-primary shadow-xl shadow-primary/5" : "border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-400 dark:text-slate-500 hover:border-slate-200 dark:hover:border-slate-700"
                                         )}
                                     >
                                         <div className="flex items-center gap-4">
@@ -329,10 +341,10 @@ export default function MaDisponibilitePage() {
                         className="xl:col-span-5 space-y-8"
                     >
                         <div className="flex items-center justify-between px-2">
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                            <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
                                 Mes <span className="text-primary font-bold">Plannings</span>
                             </h3>
-                            <div className="bg-slate-100 px-3 py-1 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                            <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                                 {existingAvailabilities.length} Créneaux
                             </div>
                         </div>
@@ -347,7 +359,7 @@ export default function MaDisponibilitePage() {
                                             initial={{ opacity: 0, scale: 0.95, y: 10 }}
                                             animate={{ opacity: 1, scale: 1, y: 0 }}
                                             exit={{ opacity: 0, scale: 0.9, x: -20 }}
-                                            className="group relative bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm hover:shadow-xl hover:border-white transition-all duration-300"
+                                            className="group relative bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] p-6 shadow-sm hover:shadow-xl hover:border-white dark:hover:border-slate-700 transition-all duration-300"
                                         >
                                             {/* Status Badge Side */}
                                             <div className={cn(

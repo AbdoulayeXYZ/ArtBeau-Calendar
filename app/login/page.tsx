@@ -48,7 +48,7 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50">
+        <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
 
             {/* Background Decorative Elements */}
             <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
@@ -89,18 +89,18 @@ export default function LoginPage() {
                                 />
                             </div>
                         </motion.div>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tighter text-center">
+                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter text-center">
                             Pro-<span className="text-primary italic">Calendar</span>
                         </h1>
-                        <p className="text-slate-500 font-bold text-sm uppercase tracking-widest mt-2">Art&apos;Beau Rescence</p>
+                        <p className="text-slate-500 dark:text-slate-400 font-bold text-sm uppercase tracking-widest mt-2">Art&apos;Beau Rescence</p>
                     </div>
 
                     {/* Main Form Card */}
                     <div className="glass-dark border-white/10 p-1 bg-slate-900/95 rounded-[2.5rem] shadow-2xl overflow-hidden shadow-slate-900/40">
-                        <div className="bg-white rounded-[2.2rem] p-8 sm:p-10 space-y-8">
+                        <div className="bg-white dark:bg-slate-900 rounded-[2.2rem] p-8 sm:p-10 space-y-8">
                             <div className="space-y-2">
-                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Espace Collaborateur</h2>
-                                <p className="text-sm text-slate-400 font-medium">Connectez-vous pour voir le planning équipe.</p>
+                                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Espace Collaborateur</h2>
+                                <p className="text-sm text-slate-400 dark:text-slate-500 font-medium">Connectez-vous pour voir le planning équipe.</p>
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-6">
@@ -128,7 +128,7 @@ export default function LoginPage() {
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value)}
                                             placeholder="Nom d'utilisateur"
-                                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-50 rounded-2xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                                            className="w-full pl-14 pr-6 py-5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-700 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600"
                                             required
                                         />
                                     </div>
@@ -142,7 +142,7 @@ export default function LoginPage() {
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Mot de passe"
-                                            className="w-full pl-14 pr-6 py-5 bg-slate-50 border-2 border-slate-50 rounded-2xl focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-900 placeholder:text-slate-300"
+                                            className="w-full pl-14 pr-6 py-5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-800 rounded-2xl focus:bg-white dark:focus:bg-slate-700 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-300 dark:placeholder:text-slate-600"
                                             required
                                         />
                                     </div>
@@ -174,7 +174,7 @@ export default function LoginPage() {
                         </div>
                         <div className="flex items-center gap-2">
                             <Shapes className="w-4 h-4" />
-                            <span className="text-[10px] font-black uppercase tracking-widest">v3.0 Grid</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest">v5.6 Dark</span>
                         </div>
                     </div>
                 </motion.div>

@@ -11,25 +11,48 @@ import {
     Menu,
     X,
     ChevronRight,
-    User
+    User,
+    Sun,
+    Moon
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 export default function Navbar({ user }: { user: any }) {
     const pathname = usePathname();
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [isDark, setIsDark] = useState(false);
 
-    const navLinks = [
-        { name: 'Calendrier Équipe', href: '/calendrier', icon: CalendarDays },
-        { name: 'Ma Disponibilité', href: '/ma-disponibilite', icon: UserCircle },
-    ];
+    useEffect(() => {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            setIsDark(true);
+            document.documentElement.classList.add('dark');
+        }
+    }, []);
+
+    const toggleTheme = () => {
+        if (isDark) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            setIsDark(false);
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+            setIsDark(true);
+        }
+    };
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
         router.push('/login');
     };
+
+    const navLinks = [
+        { name: 'Calendrier Équipe', href: '/calendrier', icon: CalendarDays },
+        { name: 'Ma Disponibilité', href: '/ma-disponibilite', icon: UserCircle },
+    ];
 
     return (
         <nav className="sticky top-0 z-50 w-full px-4 py-4 pointer-events-none">
@@ -79,16 +102,24 @@ export default function Navbar({ user }: { user: any }) {
 
                 {/* User Action */}
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={toggleTheme}
+                        className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-all shadow-sm border border-transparent dark:border-slate-700"
+                        title={isDark ? "Passer au clair" : "Passer au sombre"}
+                    >
+                        {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    </button>
+
                     <AnimatePresence mode='wait'>
                         {user ? (
-                            <div className="flex items-center gap-4 pl-4 border-l border-slate-200/50">
+                            <div className="flex items-center gap-4 pl-4 border-l border-slate-200/50 dark:border-slate-700">
                                 <div className="hidden lg:flex flex-col items-end">
-                                    <span className="text-sm font-black text-slate-900 leading-none">{user.prenom}</span>
+                                    <span className="text-sm font-black text-slate-900 dark:text-white leading-none">{user.prenom}</span>
                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">@ {user.username}</span>
                                 </div>
                                 <button
                                     onClick={handleLogout}
-                                    className="p-3 bg-slate-900 text-white rounded-2xl hover:bg-primary transition-all shadow-xl hover:shadow-primary/20 active:scale-90"
+                                    className="p-3 bg-slate-900 dark:bg-primary text-white rounded-2xl hover:bg-primary dark:hover:bg-primary-light transition-all shadow-xl hover:shadow-primary/20 active:scale-90"
                                     title="Déconnexion"
                                 >
                                     <LogOut className="w-5 h-5" />
@@ -97,7 +128,7 @@ export default function Navbar({ user }: { user: any }) {
                         ) : (
                             <Link
                                 href="/login"
-                                className="p-3 bg-slate-900 text-white rounded-2xl hover:bg-primary transition-all"
+                                className="p-3 bg-slate-900 dark:bg-primary text-white rounded-2xl hover:bg-primary transition-all"
                             >
                                 <User className="w-5 h-5" />
                             </Link>
@@ -106,7 +137,7 @@ export default function Navbar({ user }: { user: any }) {
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden p-3 rounded-2xl bg-white border border-slate-100 text-slate-900"
+                        className="md:hidden p-3 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-900 dark:text-white"
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
                     >
                         {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

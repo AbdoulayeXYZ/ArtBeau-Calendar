@@ -64,10 +64,11 @@ export async function GET(request: NextRequest) {
             conditions.push(eq(availability.logeBg, logeBgFilter === 'true'));
         }
 
-        // Filter by available now
+        // Filter by available now (considers current time)
         if (availableNow === 'true') {
             const now = new Date();
             const today = now.toISOString().split('T')[0];
+
             conditions.push(
                 and(
                     eq(availability.statut, 'disponible'),
@@ -75,6 +76,9 @@ export async function GET(request: NextRequest) {
                     gte(availability.dateFin, today)
                 )
             );
+
+            // Note: Time filtering is done on the client side since horaireText 
+            // is stored as text and would require complex SQL parsing
         }
 
         // Build query
