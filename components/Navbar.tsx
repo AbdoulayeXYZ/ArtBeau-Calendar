@@ -37,7 +37,7 @@ export default function Navbar({ user }: { user: any }) {
 
                 {/* Logo Section */}
                 <Link href="/calendrier" className="flex items-center gap-4 group">
-                    <div className="relative w-12 h-12 bg-white dark:bg-slate-950 rounded-2xl p-2 shadow-lg border border-slate-100 dark:border-slate-800 group-hover:scale-105 transition-transform duration-300">
+                    <div className="relative w-12 h-12 bg-white rounded-2xl p-2 shadow-lg border border-slate-100 dark:border-slate-700 group-hover:scale-105 transition-transform duration-300">
                         <Image
                             src="/iconlogo.png"
                             alt="Art'Beau"
