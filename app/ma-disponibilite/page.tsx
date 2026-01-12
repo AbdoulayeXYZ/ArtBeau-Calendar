@@ -229,26 +229,27 @@ export default function MaDisponibilitePage() {
 
                                     <div className="space-y-4">
                                         <div className="group relative">
-                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase">Début</span>
+                                            <span className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase">Début</span>
                                             <input
                                                 type="date"
                                                 value={dateDebut}
                                                 onChange={(e) => setDateDebut(e.target.value)}
-                                                className="w-full pl-20 pr-6 py-5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-800 rounded-3xl focus:bg-white dark:focus:bg-slate-700 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-800 dark:text-white"
+                                                className="w-full pl-16 lg:pl-20 pr-4 lg:pr-6 py-4 lg:py-5 bg-slate-50 dark:bg-slate-800 border-2 border-slate-50 dark:border-slate-800 rounded-2xl lg:rounded-3xl focus:bg-white dark:focus:bg-slate-700 focus:border-primary focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-800 dark:text-white text-sm lg:text-base"
                                                 required
                                             />
                                         </div>
                                         <div className="group relative">
-                                            <span className="absolute left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 uppercase">Fin</span>
+                                            <span className="absolute left-4 lg:left-6 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-300 dark:text-slate-600 uppercase">Fin</span>
                                             <input
                                                 type="date"
                                                 value={dateFin}
                                                 readOnly={selectionMode !== 'jour'}
+                                                onChange={(e) => selectionMode === 'jour' && setDateFin(e.target.value)}
                                                 className={cn(
-                                                    "w-full pl-20 pr-6 py-5 border-2 rounded-3xl font-bold outline-none transition-all",
+                                                    "w-full pl-16 lg:pl-20 pr-4 lg:pr-6 py-4 lg:py-5 border-2 rounded-2xl lg:rounded-3xl font-bold outline-none transition-all text-sm lg:text-base",
                                                     selectionMode === 'jour'
-                                                        ? "bg-slate-50 border-slate-50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 text-slate-800"
-                                                        : "bg-slate-100 border-slate-100 text-slate-300"
+                                                        ? "bg-slate-50 dark:bg-slate-800 border-slate-50 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-700 focus:border-primary focus:ring-4 focus:ring-primary/5 text-slate-800 dark:text-white"
+                                                        : "bg-slate-100 dark:bg-slate-800/50 border-slate-100 dark:border-slate-700 text-slate-300 dark:text-slate-500 cursor-not-allowed"
                                                 )}
                                             />
                                         </div>
@@ -386,19 +387,19 @@ export default function MaDisponibilitePage() {
                                                         )}
                                                     </div>
 
-                                                    <div className="flex items-center gap-6">
+                                                    <div className="flex items-center gap-6 flex-wrap">
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Du au</span>
-                                                            <p className="font-black text-slate-900 text-lg tracking-tight">
+                                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Du au</span>
+                                                            <p className="font-black text-slate-900 dark:text-white text-base lg:text-lg tracking-tight">
                                                                 {format(new Date(item.dateDebut), 'dd MMM', { locale: fr })}
-                                                                <span className="mx-2 text-slate-200">—</span>
+                                                                <span className="mx-2 text-slate-200 dark:text-slate-700">—</span>
                                                                 {format(new Date(item.dateFin), 'dd MMM', { locale: fr })}
                                                             </p>
                                                         </div>
-                                                        <div className="h-8 w-px bg-slate-100" />
+                                                        <div className="h-8 w-px bg-slate-100 dark:bg-slate-800" />
                                                         <div className="flex flex-col">
-                                                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Horaire</span>
-                                                            <p className="font-bold text-slate-600">
+                                                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">Horaire</span>
+                                                            <p className="font-bold text-slate-600 dark:text-slate-400">
                                                                 {item.horaireText}
                                                             </p>
                                                         </div>

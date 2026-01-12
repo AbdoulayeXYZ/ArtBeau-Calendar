@@ -11,38 +11,15 @@ import {
     Menu,
     X,
     ChevronRight,
-    User,
-    Sun,
-    Moon
+    User
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export default function Navbar({ user }: { user: any }) {
     const pathname = usePathname();
     const router = useRouter();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isDark, setIsDark] = useState(false);
-
-    useEffect(() => {
-        const theme = localStorage.getItem('theme');
-        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            setIsDark(true);
-            document.documentElement.classList.add('dark');
-        }
-    }, []);
-
-    const toggleTheme = () => {
-        if (isDark) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-            setIsDark(false);
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-            setIsDark(true);
-        }
-    };
 
     const handleLogout = async () => {
         await fetch('/api/auth/logout', { method: 'POST' });
@@ -102,14 +79,6 @@ export default function Navbar({ user }: { user: any }) {
 
                 {/* User Action */}
                 <div className="flex items-center gap-3">
-                    <button
-                        onClick={toggleTheme}
-                        className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-all shadow-sm border border-transparent dark:border-slate-700"
-                        title={isDark ? "Passer au clair" : "Passer au sombre"}
-                    >
-                        {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-                    </button>
-
                     <AnimatePresence mode='wait'>
                         {user ? (
                             <div className="flex items-center gap-4 pl-4 border-l border-slate-200/50 dark:border-slate-700">
