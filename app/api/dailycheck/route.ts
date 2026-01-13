@@ -113,10 +113,13 @@ export async function POST(request: NextRequest) {
             success: true,
             check: newCheck,
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Post daily check error:', error);
         return NextResponse.json(
-            { error: 'Erreur lors de la soumission du check' },
+            {
+                error: 'Erreur lors de la soumission du check',
+                details: error?.message || String(error)
+            },
             { status: 500 }
         );
     }
