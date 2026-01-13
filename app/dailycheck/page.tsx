@@ -52,9 +52,9 @@ export default function DailyCheckPage() {
     const [showForm, setShowForm] = useState(false);
 
     // Form states
-    const [hier, setHier] = useState('');
-    const [aujourdhui, setAujourdhui] = useState('');
-    const [blocages, setBlocages] = useState('Aucun');
+    const [hier, setHier] = useState(['', '', '']);
+    const [aujourdhui, setAujourdhui] = useState(['', '', '']);
+    const [blocages, setBlocages] = useState('');
     const [meteo, setMeteo] = useState(80);
 
     const fetchUser = useCallback(async () => {
@@ -103,20 +103,30 @@ export default function DailyCheckPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitting(true);
+
+        const hierStr = hier.filter(b => b.trim() !== '').join(' • ');
+        const aujourdhuiStr = aujourdhui.filter(b => b.trim() !== '').join(' • ');
+        const blocagesStr = blocages.trim() || 'Aucun';
+
         try {
             const response = await fetch('/api/dailycheck', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hier, aujourdhui, blocages, meteo }),
+                body: JSON.stringify({
+                    hier: hierStr,
+                    aujourdhui: aujourdhuiStr,
+                    blocages: blocagesStr,
+                    meteo
+                }),
             });
 
             if (response.ok) {
                 setShowForm(false);
                 fetchData();
                 // Reset form
-                setHier('');
-                setAujourdhui('');
-                setBlocages('Aucun');
+                setHier(['', '', '']);
+                setAujourdhui(['', '', '']);
+                setBlocages('');
                 setMeteo(80);
             } else {
                 const data = await response.json();
@@ -233,35 +243,62 @@ export default function DailyCheckPage() {
                                         </button>
                                     </div>
 
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hier</label>
-                                            <textarea
-                                                required
-                                                value={hier}
-                                                onChange={(e) => setHier(e.target.value)}
-                                                placeholder="Accomplissements..."
-                                                className="w-full p-5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary rounded-2xl text-sm font-bold outline-none transition-all min-h-[100px]"
-                                            />
+                                    <div className="space-y-6">
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Hier (Accomplissements)</label>
+                                                <span className="text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase">3 Max</span>
+                                            </div>
+                                            <div className="grid gap-3">
+                                                {hier.map((val, idx) => (
+                                                    <div key={`hier-${idx}`} className="relative group">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary/40 group-focus-within:bg-primary transition-colors" />
+                                                        <input
+                                                            value={val}
+                                                            onChange={(e) => {
+                                                                const newHier = [...hier];
+                                                                newHier[idx] = e.target.value;
+                                                                setHier(newHier);
+                                                            }}
+                                                            placeholder={idx === 0 ? "Ex: Terminé le design du Navbar" : "Optionnel..."}
+                                                            className="w-full pl-10 pr-5 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary/30 rounded-2xl text-sm font-bold outline-none transition-all shadow-inner"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Aujourd&apos;hui</label>
-                                            <textarea
-                                                required
-                                                value={aujourdhui}
-                                                onChange={(e) => setAujourdhui(e.target.value)}
-                                                placeholder="Objectifs..."
-                                                className="w-full p-5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary rounded-2xl text-sm font-bold outline-none transition-all min-h-[100px]"
-                                            />
+
+                                        <div className="space-y-3">
+                                            <div className="flex items-center justify-between">
+                                                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Aujourd&apos;hui (Objectifs)</label>
+                                                <span className="text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase">3 Max</span>
+                                            </div>
+                                            <div className="grid gap-3">
+                                                {aujourdhui.map((val, idx) => (
+                                                    <div key={`auj-${idx}`} className="relative group">
+                                                        <div className="absolute left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-emerald-400/40 group-focus-within:bg-emerald-400 transition-colors" />
+                                                        <input
+                                                            value={val}
+                                                            onChange={(e) => {
+                                                                const newAuj = [...aujourdhui];
+                                                                newAuj[idx] = e.target.value;
+                                                                setAujourdhui(newAuj);
+                                                            }}
+                                                            placeholder={idx === 0 ? "Ex: Implémenter les bullet points" : "Optionnel..."}
+                                                            className="w-full pl-10 pr-5 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-emerald-500/30 rounded-2xl text-sm font-bold outline-none transition-all shadow-inner"
+                                                        />
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
+
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Blocages</label>
                                             <input
-                                                required
                                                 value={blocages}
                                                 onChange={(e) => setBlocages(e.target.value)}
-                                                placeholder="Des freins ?"
-                                                className="w-full p-5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-primary rounded-2xl text-sm font-bold outline-none transition-all"
+                                                placeholder="Des freins ? (Laisser vide pour 'Aucun')"
+                                                className="w-full p-5 bg-slate-50 dark:bg-slate-800 border-2 border-transparent focus:border-rose-500/30 rounded-2xl text-sm font-bold outline-none transition-all shadow-inner"
                                             />
                                         </div>
                                         <div className="space-y-4 pt-4">
@@ -345,17 +382,31 @@ export default function DailyCheckPage() {
                                 <div className="space-y-6">
                                     <div className="space-y-2">
                                         <p className="text-[9px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Achievements</p>
-                                        <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-relaxed italic">
-                                            &ldquo;{check.hier}&rdquo;
-                                        </p>
+                                        <div className="space-y-1.5">
+                                            {check.hier.split(' • ').map((item, i) => (
+                                                <div key={i} className="flex items-start gap-2">
+                                                    <div className="w-1 h-1 rounded-full bg-primary mt-2 shrink-0" />
+                                                    <p className="text-sm font-medium text-slate-600 dark:text-slate-300 leading-tight italic">
+                                                        {item}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="grid sm:grid-cols-2 gap-6 pt-4 border-t border-slate-50 dark:border-slate-800/50">
-                                        <div className="space-y-2">
+                                        <div className="space-y-3">
                                             <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest">Focus Today</p>
-                                            <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
-                                                {check.aujourdhui}
-                                            </p>
+                                            <div className="space-y-2">
+                                                {check.aujourdhui.split(' • ').map((item, i) => (
+                                                    <div key={i} className="flex items-start gap-2">
+                                                        <div className="w-1 h-1 rounded-full bg-emerald-500 mt-2 shrink-0" />
+                                                        <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                                                            {item}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
                                             <p className="text-[9px] font-black text-rose-500 uppercase tracking-widest">Blockers</p>
