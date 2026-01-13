@@ -9,11 +9,8 @@ import {
     Lock,
     ArrowRight,
     Loader2,
-    AlertCircle,
-    ShieldCheck,
-    Shapes
+    AlertCircle
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');

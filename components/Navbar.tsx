@@ -11,7 +11,8 @@ import {
     Menu,
     X,
     ChevronRight,
-    User
+    User,
+    MessageSquare
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ export default function Navbar({ user }: { user: any }) {
 
     const navLinks = [
         { name: 'Calendrier Équipe', href: '/calendrier', icon: CalendarDays },
+        { name: 'Daily Check', href: '/dailycheck', icon: MessageSquare },
         { name: 'Ma Disponibilité', href: '/ma-disponibilite', icon: UserCircle },
     ];
 

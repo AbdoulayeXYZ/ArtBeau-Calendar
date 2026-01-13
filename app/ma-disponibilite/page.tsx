@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useState, FormEvent, useCallback } from 'react';
+import { useEffect, useState, useMemo, useCallback, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Calendar,
-    Clock,
     CheckCircle2,
     AlertCircle,
     Trash2,
@@ -15,9 +13,10 @@ import {
     Loader2,
     BedDouble,
     LogOut,
-    Calendar as CalendarIcon,
     X,
-    Smile
+    Calendar,
+    Clock,
+    Calendar as CalendarIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, addDays, endOfMonth } from 'date-fns';

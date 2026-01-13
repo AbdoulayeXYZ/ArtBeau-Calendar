@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Calendar, UserCircle, Settings } from 'lucide-react';
+import { Calendar, UserCircle, Settings, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
     { href: '/calendrier', icon: Calendar, label: 'Calendrier' },
+    { href: '/dailycheck', icon: MessageSquare, label: 'DailyCheck' },
     { href: '/ma-disponibilite', icon: UserCircle, label: 'Ma Dispo' },
     // { href: '/profile', icon: Settings, label: 'Profil' },
 ];

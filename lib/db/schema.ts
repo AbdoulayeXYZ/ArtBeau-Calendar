@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, varchar, boolean, date, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, varchar, boolean, date, pgEnum, integer } from 'drizzle-orm/pg-core';
 
 // Enums
 export const periodeTypeEnum = pgEnum('periode_type', ['jour', 'semaine', 'mois']);
@@ -28,8 +28,22 @@ export const availability = pgTable('availability', {
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// DailyCheck table
+export const dailyChecks = pgTable('daily_checks', {
+    id: serial('id').primaryKey(),
+    userId: integer('user_id').references(() => users.id).notNull(),
+    date: date('date').notNull(),
+    hier: text('hier').notNull(),
+    aujourdhui: text('aujourdhui').notNull(),
+    blocages: text('blocages').notNull(),
+    meteo: integer('meteo').notNull(), // 0 to 100
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Availability = typeof availability.$inferSelect;
 export type NewAvailability = typeof availability.$inferInsert;
+export type DailyCheck = typeof dailyChecks.$inferSelect;
+export type NewDailyCheck = typeof dailyChecks.$inferInsert;

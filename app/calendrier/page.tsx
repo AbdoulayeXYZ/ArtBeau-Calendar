@@ -1,18 +1,13 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Navbar from '@/components/Navbar';
 import FilterBar from '@/components/FilterBar';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Clock,
-    MapPin,
-    ArrowRight,
-    Info,
-    Calendar as CalendarIcon,
     ChevronLeft,
     ChevronRight,
-    Users,
     BedDouble
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -56,7 +51,6 @@ const PX_PER_HOUR = 50; // Compact height
 export default function CalendrierPage() {
     // ... state ...
     const [user, setUser] = useState<{ nom: string; prenom: string; username: string } | null>(null);
-    const [loading, setLoading] = useState(true);
     const [availability, setAvailability] = useState<AvailabilityData[]>([]);
 
     // Navigation & View State
@@ -66,14 +60,6 @@ export default function CalendrierPage() {
     // Filters
     const [logeBgOnly, setLogeBgOnly] = useState(false);
     const [availableNowOnly, setAvailableNowOnly] = useState(false);
-
-    useEffect(() => {
-        fetchUser();
-    }, []);
-
-    useEffect(() => {
-        fetchAvailability();
-    }, [period, logeBgOnly, availableNowOnly, currentDate]);
 
     const fetchUser = async () => {
         try {
@@ -87,8 +73,8 @@ export default function CalendrierPage() {
         }
     };
 
-    const fetchAvailability = async () => {
-        setLoading(true);
+    const fetchAvailability = useCallback(async () => {
+        // setLoading(true);
         try {
             const params = new URLSearchParams();
             params.append('period', period);
@@ -105,19 +91,15 @@ export default function CalendrierPage() {
                     const now = new Date();
                     const currentHour = now.getHours();
                     const currentMinute = now.getMinutes();
-                    const currentTimeDecimal = currentHour + currentMinute / 60;
+                    const currentDecimalTime = currentHour + currentMinute / 60;
 
-                    results = results.filter((a: AvailabilityData) => {
-                        if (!a.horaireText || !a.horaireText.includes('-')) return false;
-
+                    results = results.filter((a: any) => {
                         try {
-                            const [start, end] = a.horaireText.split('-').map(s => s.trim());
-                            const [startH, startM] = start.split(':').map(Number);
-                            const [endH, endM] = end.split(':').map(Number);
-                            const startTimeDecimal = startH + (startM || 0) / 60;
-                            const endTimeDecimal = endH + (endM || 0) / 60;
-
-                            return currentTimeDecimal >= startTimeDecimal && currentTimeDecimal <= endTimeDecimal;
+                            const [startH, startM] = a.horaireText.split(' - ')[0].split('h').map(Number);
+                            const [endH, endM] = a.horaireText.split(' - ')[1].split('h').map(Number);
+                            const startDecimal = startH + (startM || 0) / 60;
+                            const endDecimal = endH + (endM || 0) / 60;
+                            return currentDecimalTime >= startDecimal && currentDecimalTime <= endDecimal;
                         } catch {
                             return false;
                         }
@@ -128,10 +110,16 @@ export default function CalendrierPage() {
             }
         } catch (error) {
             console.error('Fetch availability error:', error);
-        } finally {
-            setLoading(false);
         }
-    };
+    }, [period, logeBgOnly, availableNowOnly]);
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        fetchAvailability();
+    }, [period, logeBgOnly, availableNowOnly, fetchAvailability]);
 
     const teamMembers = useMemo(() => {
         const membersMap = new Map();
