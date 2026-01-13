@@ -5,9 +5,10 @@ import Navbar from '@/components/Navbar';
 import FilterBar from '@/components/FilterBar';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Clock,
     ChevronLeft,
     ChevronRight,
+    Users,
+    Clock,
     BedDouble
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -208,46 +209,70 @@ export default function CalendrierPage() {
     };
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden bg-slate-50/30 dark:bg-slate-950 transition-colors duration-500 selection:bg-primary/10 text-xs">
+        <div className="min-h-screen flex flex-col bg-[#f8fafc] dark:bg-[#0a0a0a] transition-colors duration-500 pb-32">
             <Navbar user={user} />
 
-            <main className="flex-1 flex flex-col min-h-0 w-full max-w-[1700px] mx-auto px-2 lg:px-4 py-2">
-                {/* Superior Header - COMPACT */}
-                <div className="flex-none flex items-center justify-between mb-2 gap-4">
-                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
-                        <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tighter">
-                            Art&apos;Beau <span className="text-primary">Cal.</span>
-                        </h3>
-                        <div className="flex items-center gap-2 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
-                            <button onClick={prev} className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronLeft className="w-4 h-4 text-slate-400" /></button>
-                            <span className="text-xs font-black text-slate-700 dark:text-slate-300 min-w-[120px] text-center capitalize">{dayLabel}</span>
-                            <button onClick={next} className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors"><ChevronRight className="w-4 h-4 text-slate-400" /></button>
-                        </div>
-                    </motion.div>
+            <main className="flex-1 flex flex-col w-full max-w-[1700px] mx-auto px-4 lg:px-6 py-4">
+                {/* Mobile Header / Date Navigation */}
+                <div className="flex flex-col gap-6 mb-8">
+                    <div className="flex items-center justify-between">
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            className="space-y-1"
+                        >
+                            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">
+                                Planning <span className="text-primary">Équipe</span>
+                            </h2>
+                            <p className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Live Performance Overview</p>
+                        </motion.div>
 
-                    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-4 bg-white dark:bg-slate-900 p-2 px-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-                        <div className="flex -space-x-2">
+                        <div className="flex items-center gap-2 bg-white dark:bg-slate-900 p-1.5 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-slate-800">
+                            <button onClick={prev} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90">
+                                <ChevronLeft className="w-5 h-5 text-slate-500" />
+                            </button>
+                            <div className="px-4 py-2 min-w-[140px] text-center">
+                                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider block">
+                                    {dayLabel}
+                                </span>
+                                {isToday(currentDate) && (
+                                    <span className="text-[10px] font-black text-primary uppercase animate-pulse">Aujourd&apos;hui</span>
+                                )}
+                            </div>
+                            <button onClick={next} className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all active:scale-90">
+                                <ChevronRight className="w-5 h-5 text-slate-500" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Stats & Members Overview */}
+                    <div className="flex items-center gap-4 overflow-x-auto no-scrollbar py-2">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="flex items-center gap-4 bg-primary/10 border border-primary/20 p-4 rounded-3xl min-w-max"
+                        >
+                            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+                                <Users className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-primary uppercase tracking-widest">Collaborateurs</p>
+                                <p className="text-xl font-black text-slate-900 dark:text-white leading-none">{teamMembers.length}</p>
+                            </div>
+                        </motion.div>
+
+                        <div className="flex -space-x-3">
                             {teamMembers.slice(0, 5).map((m) => (
-                                <div key={m.username} className="h-8 w-8 rounded-lg ring-2 ring-white dark:ring-slate-900 bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 uppercase">
+                                <div key={m.username} className="h-12 w-12 rounded-2xl ring-4 ring-white dark:ring-[#0a0a0a] bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-xs text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 uppercase shadow-lg">
                                     {m.prenom[0]}{m.nom[0]}
                                 </div>
                             ))}
-                            {teamMembers.length > 5 && (
-                                <div className="h-8 w-8 rounded-lg ring-2 ring-white dark:ring-slate-900 bg-slate-900 dark:bg-primary text-white text-[10px] font-black flex items-center justify-center">
-                                    +{teamMembers.length - 5}
-                                </div>
-                            )}
                         </div>
-                        <div className="h-6 w-px bg-slate-100 dark:bg-slate-800" />
-                        <div className="flex flex-col">
-                            <span className="text-[8px] font-black text-slate-300 dark:text-slate-600 uppercase tracking-widest">Active</span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">{teamMembers.length}</span>
-                        </div>
-                    </motion.div>
+                    </div>
                 </div>
 
-                {/* Pro Filters - COMPACT */}
-                <div className="flex-none mb-2 z-40 transform scale-90 origin-top-left">
+                {/* Filters */}
+                <div className="mb-8 overflow-x-auto no-scrollbar">
                     <FilterBar
                         period={period}
                         setPeriod={setPeriod}
